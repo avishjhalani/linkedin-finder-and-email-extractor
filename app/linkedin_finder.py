@@ -79,16 +79,34 @@ def search_linkedin_leads(
     domain = custom_domain.strip().lower() if custom_domain else resolve_company_domain(company)
     mx_valid, mx_hosts, mail_provider = verify_mx_records(domain)
     
-    # 2. Build search queries
+    # 2. Build search queries with location intelligence
     queries = []
-    loc_part = f'"{location}"' if location else ''
+    loc_clean = (location or "").strip().lower()
     
-    # Primary precise query
-    queries.append(f'site:linkedin.com/in/ "{company}" "{role}" {loc_part}'.strip())
-    # Secondary broader query
-    queries.append(f'site:linkedin.com/in/ "{company}" {role} {loc_part}'.strip())
-    # Fallback without quotes around company if niche
-    queries.append(f'site:linkedin.com/in/ {company} {role} {loc_part}'.strip())
+    if loc_clean == "india":
+        # Targeted India queries
+        queries.append(f'site:in.linkedin.com/in/ "{company}" ("{role}" OR "Human Resources" OR "Talent Acquisition")')
+        queries.append(f'site:linkedin.com/in/ "{company}" ("{role}" OR "Human Resources") "India"')
+        queries.append(f'site:linkedin.com/in/ "{company}" "{role}" (Bengaluru OR Hyderabad OR Gurgaon OR Noida OR India)')
+    elif location:
+        loc_part = f'"{location}"'
+        queries.append(f'site:linkedin.com/in/ "{company}" "{role}" {loc_part}'.strip())
+        queries.append(f'site:linkedin.com/in/ "{company}" {role} {loc_part}'.strip())
+        queries.append(f'site:linkedin.com/in/ {company} {role} {loc_part}'.strip())
+    else:
+        queries.append(f'site:linkedin.com/in/ "{company}" "{role}"'.strip())
+        queries.append(f'site:linkedin.com/in/ "{company}" {role}'.strip())
+        queries.append(f'site:linkedin.com/in/ {company} {role}'.strip())
+
+    foreign_domains = [
+        'uk.linkedin.com', 'us.linkedin.com', 'au.linkedin.com', 'ca.linkedin.com',
+        'ph.linkedin.com', 'ie.linkedin.com', 'sg.linkedin.com', 'nz.linkedin.com',
+        'za.linkedin.com', 'my.linkedin.com', 'ae.linkedin.com', 'de.linkedin.com', 'fr.linkedin.com'
+    ]
+    indian_cities = [
+        'india', 'bengaluru', 'bangalore', 'hyderabad', 'gurgaon', 'gurugram',
+        'noida', 'mumbai', 'pune', 'chennai', 'delhi', 'new delhi', 'kolkata', 'ahmedabad'
+    ]
 
     seen_urls = set()
     seen_names = set()
@@ -115,9 +133,24 @@ def search_linkedin_leads(
                 clean_url = clean_linkedin_url(raw_url)
                 if clean_url in seen_urls:
                     continue
-                
+
                 title = item.get('title', '')
                 snippet = item.get('body', '')
+
+                # Strict location verification if India is specified
+                if loc_clean == "india":
+                    url_lower = clean_url.lower()
+                    combined_text = (title + " " + snippet).lower()
+                    if any(fd in url_lower for fd in foreign_domains):
+                        continue
+                    if "location: united states" in combined_text or "location: united kingdom" in combined_text or "location: philippines" in combined_text or "location: canada" in combined_text:
+                        continue
+                    if "in.linkedin.com" not in url_lower and not any(city in combined_text for city in indian_cities):
+                        continue
+                elif location:
+                    combined_text = (title + " " + snippet).lower()
+                    if loc_clean not in combined_text and loc_clean not in clean_url.lower():
+                        continue
                 
                 # Extract person name and headline
                 title_clean = title.split(' | LinkedIn')[0].strip()

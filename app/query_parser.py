@@ -43,9 +43,9 @@ def parse_natural_language_query(query_text: str) -> Dict[str, Any]:
         text = re.sub(r'\b' + count_match.group(1) + r'\b', '', text, count=1).strip()
     count = max(1, min(count, 50))
     
-    # 2. Extract Location ("in new york", "based in london", "located in bangalore")
+    # 2. Extract Location ("in india", "from india", "only from india", "based in london", "located in bangalore")
     location = ""
-    loc_match = re.search(r'\b(?:located in|based in|in)\s+([a-zA-Z\s,]+)$', text, re.IGNORECASE)
+    loc_match = re.search(r'\b(?:located in|based in|only from|from|in)\s+([a-zA-Z\s,]+)$', text, re.IGNORECASE)
     if loc_match:
         location = loc_match.group(1).strip()
         text = text[:loc_match.start()].strip()
