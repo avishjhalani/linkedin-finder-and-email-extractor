@@ -2,6 +2,7 @@ import os
 import json
 from pathlib import Path
 from typing import List, Dict, Any, Optional
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, Response
@@ -17,9 +18,13 @@ from app.sheets_sync import (
     GOOGLE_APPS_SCRIPT_TEMPLATE
 )
 
+# Load environment variables from .env file if present
+load_dotenv()
+
 CONFIG_FILE = Path("config.json")
 
-def load_config() -> Dict[str, Any]:
+def load_file_config() -> Dict[str, Any]:
+    """Loads settings stored on disk in config.json."""
     if CONFIG_FILE.exists():
         try:
             with open(CONFIG_FILE, "r", encoding="utf-8") as f:
@@ -35,9 +40,39 @@ def load_config() -> Dict[str, Any]:
         "spreadsheet_id": ""
     }
 
-def save_config(cfg: Dict[str, Any]):
+def save_file_config(cfg: Dict[str, Any]):
+    """Saves non-sensitive settings or user overrides."""
     with open(CONFIG_FILE, "w", encoding="utf-8") as f:
         json.dump(cfg, f, indent=2)
+
+def get_effective_config() -> Dict[str, Any]:
+    """
+    Returns effective server config prioritizing Environment Variables
+    (Render / Cloud secrets) over local config.json.
+    """
+    disk = load_file_config()
+    return {
+        "webhook_url": os.getenv("GOOGLE_WEBHOOK_URL") or disk.get("webhook_url", ""),
+        "apollo_api_key": os.getenv("APOLLO_API_KEY") or disk.get("apollo_api_key", ""),
+        "hunter_api_key": os.getenv("HUNTER_API_KEY") or disk.get("hunter_api_key", ""),
+        "default_pattern": os.getenv("DEFAULT_PATTERN") or disk.get("default_pattern", "first.last"),
+        "service_account_path": disk.get("service_account_path", ""),
+        "spreadsheet_id": disk.get("spreadsheet_id", "")
+    }
+
+def mask_secret(secret: str, is_url: bool = False) -> str:
+    """Masks secrets so they are NEVER exposed in browser network inspection."""
+    if not secret:
+        return ""
+    if is_url:
+        if "/macros/s/" in secret:
+            prefix = secret.split("/macros/s/")[0] + "/macros/s/"
+            suffix = "/exec" if secret.endswith("/exec") else ""
+            return f"{prefix}••••••••••••••••{suffix}"
+        return secret[:15] + "••••••••"
+    if len(secret) <= 8:
+        return "••••••••"
+    return "••••••••" + secret[-4:]
 
 app = FastAPI(
     title="LinkedIn Finder & Email Scraper",
@@ -45,7 +80,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Models
+# Request Models
 class QueryParseRequest(BaseModel):
     query: str
 
@@ -79,8 +114,9 @@ class ConfigUpdateRequest(BaseModel):
 @app.post("/api/parse")
 def api_parse_query(req: QueryParseRequest):
     parsed = parse_natural_language_query(req.query)
-    # Also resolve domain preview for this company
-    domain = resolve_company_domain(parsed["company"])
+    cfg = get_effective_config()
+    apollo_key = cfg.get("apollo_api_key", "").strip() or None
+    domain = resolve_company_domain(parsed["company"], apollo_key)
     mx_valid, _, provider = verify_mx_records(domain)
     parsed["detected_domain"] = domain
     parsed["domain_mx_valid"] = mx_valid
@@ -89,7 +125,7 @@ def api_parse_query(req: QueryParseRequest):
 
 @app.post("/api/search")
 def api_search(req: SearchRequest):
-    cfg = load_config()
+    cfg = get_effective_config()
     hunter_key = cfg.get("hunter_api_key", "").strip() or None
     apollo_key = cfg.get("apollo_api_key", "").strip() or None
     
@@ -110,13 +146,20 @@ def api_search(req: SearchRequest):
 
 @app.post("/api/export/sheets")
 def api_export_sheets(req: SheetsExportRequest):
-    cfg = load_config()
+    cfg = get_effective_config()
     
     if req.method == "webhook":
-        url = (req.webhook_url or cfg.get("webhook_url", "")).strip()
-        if not url:
-            raise HTTPException(status_code=400, detail="No Google Apps Script Webhook URL provided.")
-        result = push_to_webhook(url, req.leads)
+        provided_url = (req.webhook_url or "").strip()
+        # If user left the masked placeholder or empty, use server's secure secret
+        if not provided_url or "••••" in provided_url:
+            effective_url = cfg.get("webhook_url", "").strip()
+        else:
+            effective_url = provided_url
+
+        if not effective_url:
+            raise HTTPException(status_code=400, detail="No Google Apps Script Webhook URL configured on server.")
+            
+        result = push_to_webhook(effective_url, req.leads)
         if not result.get("success"):
             raise HTTPException(status_code=400, detail=result.get("error", "Failed to push to Google Sheet Webhook."))
         return result
@@ -128,7 +171,7 @@ def api_export_sheets(req: SheetsExportRequest):
             raise HTTPException(status_code=400, detail="Service account path and Spreadsheet ID are required.")
         result = push_to_service_account(creds, sheet, req.leads)
         if not result.get("success"):
-            raise HTTPException(status_code=400, detail=result.get("error", "Failed to push to Google Sheet via Service Account."))
+            raise HTTPException(status_code=400, detail=result.get("error", "Failed to push via Service Account."))
         return result
     else:
         raise HTTPException(status_code=400, detail=f"Unsupported export method '{req.method}'.")
@@ -146,19 +189,48 @@ def api_export_csv(req: CsvExportRequest):
 
 @app.get("/api/config")
 def api_get_config():
-    return load_config()
+    """
+    Returns sanitized, masked configuration safe for web display.
+    Secrets are masked so site visitors can NEVER inspect or steal them.
+    """
+    cfg = get_effective_config()
+    return {
+        "webhook_configured": bool(cfg.get("webhook_url")),
+        "webhook_masked": mask_secret(cfg.get("webhook_url", ""), is_url=True),
+        "apollo_configured": bool(cfg.get("apollo_api_key")),
+        "apollo_masked": mask_secret(cfg.get("apollo_api_key", "")),
+        "hunter_configured": bool(cfg.get("hunter_api_key")),
+        "hunter_masked": mask_secret(cfg.get("hunter_api_key", "")),
+        "default_pattern": cfg.get("default_pattern", "first.last"),
+        "is_env_webhook": bool(os.getenv("GOOGLE_WEBHOOK_URL")),
+        "is_env_apollo": bool(os.getenv("APOLLO_API_KEY"))
+    }
 
 @app.post("/api/config")
 def api_update_config(req: ConfigUpdateRequest):
-    cfg = load_config()
-    data = req.dict(exclude_unset=True)
-    cfg.update(data)
-    save_config(cfg)
-    return {"status": "saved", "config": cfg}
+    """Saves user settings, ignoring masked placeholders."""
+    disk = load_file_config()
+    
+    # Only update if user provided an actual new unmasked value
+    if req.webhook_url and "••••" not in req.webhook_url:
+        disk["webhook_url"] = req.webhook_url.strip()
+    if req.apollo_api_key and "••••" not in req.apollo_api_key:
+        disk["apollo_api_key"] = req.apollo_api_key.strip()
+    if req.hunter_api_key and "••••" not in req.hunter_api_key:
+        disk["hunter_api_key"] = req.hunter_api_key.strip()
+    if req.default_pattern:
+        disk["default_pattern"] = req.default_pattern
+        
+    save_file_config(disk)
+    return {"status": "saved", "config": api_get_config()}
 
 @app.get("/api/script-template")
 def api_get_script_template():
     return {"template": GOOGLE_APPS_SCRIPT_TEMPLATE}
+
+@app.get("/health")
+def health_check():
+    return {"status": "healthy", "service": "linkedin-finder"}
 
 # Mount static files
 static_dir = Path(__file__).parent / "static"
@@ -169,4 +241,4 @@ def serve_index():
     index_file = static_dir / "index.html"
     if index_file.exists():
         return FileResponse(str(index_file))
-    return {"message": "LinkedIn Finder API is running. Index file not created yet."}
+    return {"message": "LinkedIn Finder API is running."}

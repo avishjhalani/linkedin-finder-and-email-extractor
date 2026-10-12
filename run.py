@@ -10,16 +10,18 @@ def open_browser():
     webbrowser.open("http://localhost:8000")
 
 def main():
+    port = int(os.getenv("PORT", 8000))
     print("=" * 60)
     print("  LinkedIn Finder & Email Extractor (YAMM-Ready)")
     print("=" * 60)
-    print("Starting web server at http://localhost:8000 ...")
+    print(f"Starting web server at http://localhost:{port} ...")
     
-    # Launch browser automatically in a separate thread
-    threading.Thread(target=open_browser, daemon=True).start()
+    # Only launch browser if running locally (not in headless cloud container)
+    if os.getenv("RENDER") is None and os.getenv("DYNO") is None and os.getenv("SPACE_ID") is None:
+        threading.Thread(target=open_browser, daemon=True).start()
     
     # Run uvicorn server
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=False)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=False)
 
 if __name__ == "__main__":
     main()

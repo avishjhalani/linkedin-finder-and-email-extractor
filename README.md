@@ -192,8 +192,49 @@ d:\linkedin finder and email extractor\
 
 ---
 
+## 🌐 100% Free Web Deployment Guide
+
+You can deploy this application online for free in under 3 minutes using either **Render.com** (Recommended) or **Hugging Face Spaces**.
+
+### Option A: Deploy on Render.com (Recommended — 3 Minutes)
+
+1. Push your project to a free **GitHub** repository (keys are automatically ignored via `.gitignore`).
+2. Go to [**Render.com**](https://render.com) and create a free account.
+3. Click **New +** &rarr; **Web Service**.
+4. Connect your GitHub repository.
+5. Render will detect the configuration automatically, or select:
+   - **Runtime**: `Python 3`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+   - **Instance Type**: `Free`
+6. Under **Environment Variables**, add:
+   - `GOOGLE_WEBHOOK_URL` = *(Your Google Apps Script Webhook URL)*
+   - `APOLLO_API_KEY` = *(Your Apollo API Key)*
+7. Click **Create Web Service**. Render will deploy your live HTTPS web app!
+
+---
+
+### Option B: Deploy on Hugging Face Spaces (No Credit Card Required)
+
+1. Create a free account at [**huggingface.co**](https://huggingface.co).
+2. Click **New Space** &rarr; Select SDK **Docker** &rarr; **Blank**.
+3. Push or upload this repo's files (our included [`Dockerfile`](file:///d:/linkedin%20finder%20and%20email%20extractor/Dockerfile) handles setup automatically).
+4. Go to **Settings** &rarr; **Variables and secrets** and add `GOOGLE_WEBHOOK_URL` and `APOLLO_API_KEY`.
+5. Your Space is live immediately!
+
+---
+
+## 🔒 Security & Privacy: How Your API Keys Are Protected
+
+- **Zero Git Leaks**: Your `.env` and `config.json` files are automatically excluded by `.gitignore`. They will **never** be pushed to GitHub.
+- **Server-Side Masking**: The web API automatically masks all secrets (`••••••••IaxTg`). Site visitors inspecting network requests in browser DevTools cannot view or steal your keys.
+- **Environment Priority**: When hosted online, the backend securely reads keys from your cloud hosting dashboard environment variables.
+
+---
+
 ## 🛡️ Best Practices & Legal Notes
 
 - This tool discovers **publicly indexed LinkedIn profiles** via search engines without violating LinkedIn login sessions or scraping private account pages.
 - Email generation uses standard enterprise RFC patterns combined with real-time MX DNS server validation.
 - When doing cold outreach via YAMM, always adhere to CAN-SPAM / GDPR guidelines, include an unsubscribe option, and maintain reasonable sending volumes.
+

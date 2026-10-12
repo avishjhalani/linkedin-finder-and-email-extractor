@@ -73,11 +73,11 @@ async function initApp() {
     const res = await fetch("/api/config");
     if (res.ok) {
       appConfig = await res.json();
-      cfgWebhookUrl.value = appConfig.webhook_url || "";
-      if (cfgApolloKey) cfgApolloKey.value = appConfig.apollo_api_key || "";
-      cfgHunterKey.value = appConfig.hunter_api_key || "";
+      cfgWebhookUrl.value = appConfig.webhook_masked || "";
+      if (cfgApolloKey) cfgApolloKey.value = appConfig.apollo_masked || "";
+      cfgHunterKey.value = appConfig.hunter_masked || "";
       cfgDefaultPattern.value = appConfig.default_pattern || "first.last";
-      pushWebhookUrlInput.value = appConfig.webhook_url || "";
+      pushWebhookUrlInput.value = appConfig.webhook_masked || "";
     }
   } catch (e) {
     console.error("Config fetch error:", e);
@@ -506,20 +506,31 @@ btnOpenSettings.addEventListener("click", () => {
 });
 
 btnSaveSettings.addEventListener("click", async () => {
-  appConfig.webhook_url = cfgWebhookUrl.value.trim();
-  if (cfgApolloKey) appConfig.apollo_api_key = cfgApolloKey.value.trim();
-  appConfig.hunter_api_key = cfgHunterKey.value.trim();
-  appConfig.default_pattern = cfgDefaultPattern.value;
+  const payload = {
+    default_pattern: cfgDefaultPattern.value
+  };
+  const webVal = cfgWebhookUrl.value.trim();
+  if (webVal && !webVal.includes("••••")) payload.webhook_url = webVal;
+
+  if (cfgApolloKey) {
+    const apolloVal = cfgApolloKey.value.trim();
+    if (apolloVal && !apolloVal.includes("••••")) payload.apollo_api_key = apolloVal;
+  }
+
+  const hunterVal = cfgHunterKey.value.trim();
+  if (hunterVal && !hunterVal.includes("••••")) payload.hunter_api_key = hunterVal;
 
   try {
     const res = await fetch("/api/config", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(appConfig)
+      body: JSON.stringify(payload)
     });
     if (res.ok) {
+      const data = await res.json();
+      appConfig = data.config;
       document.getElementById("settingsSaveStatus").textContent = "Settings saved!";
-      showToast("Settings updated successfully!");
+      showToast("Settings updated securely!");
       setTimeout(() => {
         document.getElementById("settingsSaveStatus").textContent = "";
         settingsModal.classList.add("hidden");
