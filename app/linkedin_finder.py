@@ -78,7 +78,7 @@ def search_linkedin_leads(
     Discovers LinkedIn profiles using X-Ray search and enriches with emails.
     """
     # 1. Resolve Company Domain and MX
-    domain = custom_domain.strip().lower() if custom_domain else resolve_company_domain(company)
+    domain = custom_domain.strip().lower() if custom_domain else resolve_company_domain(company, apollo_api_key)
     mx_valid, mx_hosts, mail_provider = verify_mx_records(domain)
     
     # 2. Build search queries with location intelligence

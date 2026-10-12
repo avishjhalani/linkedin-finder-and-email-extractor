@@ -50,11 +50,17 @@ KNOWN_COMPANY_DOMAINS = {
     "spotify": "spotify.com"
 }
 
-def resolve_company_domain(company_name: str) -> str:
+def resolve_company_domain(company_name: str, apollo_api_key: Optional[str] = None) -> str:
     """Finds the primary domain for a given company name."""
     clean_name = company_name.strip().lower()
     if clean_name in KNOWN_COMPANY_DOMAINS:
         return KNOWN_COMPANY_DOMAINS[clean_name]
+
+    # Check Apollo Organization Enrichment if API key provided
+    if apollo_api_key:
+        apollo_org = enrich_organization_apollo(clean_name, apollo_api_key)
+        if apollo_org and apollo_org.get("domain"):
+            return apollo_org["domain"]
 
     # Search web for official website
     query = f'"{company_name}" official website'
@@ -274,5 +280,39 @@ def query_apollo_io(
                     }
     except Exception as e:
         print(f"Apollo match error: {e}")
+    return None
+
+def enrich_organization_apollo(domain_or_name: str, api_key: str) -> Optional[Dict[str, Any]]:
+    """
+    Enrich company details and verify domain using Apollo.io Organization Enrichment API.
+    Works on Free & Paid Apollo plans.
+    """
+    if not api_key:
+        return None
+    try:
+        url = f"https://api.apollo.io/v1/organizations/enrich?domain={urllib.parse.quote(domain_or_name)}"
+        headers = {
+            "Content-Type": "application/json",
+            "Cache-Control": "no-cache",
+            "X-Api-Key": api_key.strip()
+        }
+        with httpx.Client(timeout=6.0) as client:
+            resp = client.get(url, headers=headers)
+            if resp.status_code == 200:
+                org = resp.json().get("organization") or {}
+                website = org.get("website_url") or ""
+                parsed = urllib.parse.urlparse(website)
+                dom = parsed.netloc.lower()
+                if dom.startswith("www."):
+                    dom = dom[4:]
+                return {
+                    "name": org.get("name"),
+                    "domain": dom,
+                    "linkedin_url": org.get("linkedin_url"),
+                    "employees": org.get("estimated_num_employees"),
+                    "industry": org.get("industry")
+                }
+    except Exception as e:
+        print(f"Apollo org enrichment error: {e}")
     return None
 
