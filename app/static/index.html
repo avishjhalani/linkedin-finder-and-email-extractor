@@ -269,16 +269,15 @@
             <i class="fa-solid fa-paper-plane"></i> How to Send Emails with Yet Another Mail Merge (YAMM)
           </h4>
           <p class="text-xs text-slate-300">
-            The columns pushed to your sheet are 100% formatted for YAMM:
+            Your Google Sheet contains strictly 3 columns formatted for clean mail merge:
           </p>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-            <div class="bg-slate-900 p-2 rounded border border-slate-800 text-center"><span class="text-slate-400 block text-[10px]">Recipient Email</span><code class="text-cyan-300">{{Email Address}}</code></div>
-            <div class="bg-slate-900 p-2 rounded border border-slate-800 text-center"><span class="text-slate-400 block text-[10px]">First Name</span><code class="text-cyan-300">{{First Name}}</code></div>
-            <div class="bg-slate-900 p-2 rounded border border-slate-800 text-center"><span class="text-slate-400 block text-[10px]">Job Title</span><code class="text-cyan-300">{{Job Title}}</code></div>
-            <div class="bg-slate-900 p-2 rounded border border-slate-800 text-center"><span class="text-slate-400 block text-[10px]">Company</span><code class="text-cyan-300">{{Company}}</code></div>
+          <div class="grid grid-cols-3 gap-3 text-xs">
+            <div class="bg-slate-900 p-2.5 rounded border border-slate-800 text-center"><span class="text-slate-400 block text-[10px] mb-1">Column A</span><code class="text-cyan-300 font-bold font-mono">{{Name}}</code></div>
+            <div class="bg-slate-900 p-2.5 rounded border border-slate-800 text-center"><span class="text-slate-400 block text-[10px] mb-1">Column B (Recipient)</span><code class="text-cyan-300 font-bold font-mono">{{Email}}</code></div>
+            <div class="bg-slate-900 p-2.5 rounded border border-slate-800 text-center"><span class="text-slate-400 block text-[10px] mb-1">Column C</span><code class="text-cyan-300 font-bold font-mono">{{Company}}</code></div>
           </div>
           <p class="text-xs text-slate-400">
-            In your Gmail draft, write: <code class="text-amber-300 bg-slate-900 px-1 py-0.5 rounded">"Hi {{First Name}}, saw your work as {{Job Title}} at {{Company}}..."</code> and start YAMM from Google Sheets!
+            In your Gmail draft, write: <code class="text-amber-300 bg-slate-900 px-1.5 py-0.5 rounded font-mono">"Hi {{Name}}, saw your work at {{Company}}..."</code> and start YAMM from Google Sheets!
           </p>
         </div>
 

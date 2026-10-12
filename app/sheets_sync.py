@@ -8,15 +8,14 @@ from google.oauth2.service_account import Credentials
 
 GOOGLE_APPS_SCRIPT_TEMPLATE = """/**
  * Google Apps Script for LinkedIn Lead Exporter
+ * Format: Name | Email | Company (Strictly 3 columns)
+ *
  * 1. Open your Google Sheet
  * 2. Click Extensions > Apps Script
- * 3. Delete any default code and paste this entire code
- * 4. Click 'Deploy' > 'New deployment'
- * 5. Select type: 'Web app'
- * 6. Set Description: 'Lead Webhook'
- * 7. Set 'Who has access': 'Anyone' (IMPORTANT!)
- * 8. Click 'Deploy' and copy the 'Web app URL'
- * 9. Paste that URL into the LinkedIn Finder app!
+ * 3. Replace all code with this snippet
+ * 4. Click 'Deploy' > 'Manage deployments' > Edit (or 'New deployment')
+ * 5. Version: 'New version', Who has access: 'Anyone'
+ * 6. Click 'Deploy'
  */
 
 function doPost(e) {
@@ -25,50 +24,34 @@ function doPost(e) {
     var payload = JSON.parse(e.postData.contents);
     var leads = payload.leads || [];
     
-    // Check if headers exist, if not create them
+    // Check if headers exist, if not create them (Name, Email, Company)
     if (sheet.getLastRow() === 0) {
-      sheet.appendRow([
-        "First Name",
-        "Last Name",
-        "Email Address",
-        "Job Title",
-        "Company",
-        "LinkedIn Profile",
-        "Email Confidence",
-        "Date Added"
-      ]);
-      // Format header row bold with nice background
-      var headerRange = sheet.getRange(1, 1, 1, 8);
+      sheet.appendRow(["Name", "Email", "Company"]);
+      var headerRange = sheet.getRange(1, 1, 1, 3);
       headerRange.setFontWeight("bold");
       headerRange.setBackground("#E8F0FE");
     }
     
-    var today = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd");
     var rowsToAdd = [];
     
     for (var i = 0; i < leads.length; i++) {
       var lead = leads[i];
-      rowsToAdd.push([
-        lead.first_name || "",
-        lead.last_name || "",
-        lead.email || "",
-        lead.job_title || "",
-        lead.company || "",
-        lead.linkedin_url || "",
-        lead.confidence || "",
-        today
-      ]);
+      var name = lead.name || lead.full_name || (lead.first_name + " " + lead.last_name).trim();
+      var email = lead.email || "";
+      var company = lead.company || "";
+      
+      rowsToAdd.push([name, email, company]);
     }
     
     if (rowsToAdd.length > 0) {
       var startRow = sheet.getLastRow() + 1;
-      var range = sheet.getRange(startRow, 1, rowsToAdd.length, 8);
+      var range = sheet.getRange(startRow, 1, rowsToAdd.length, 3);
       range.setValues(rowsToAdd);
     }
     
     return ContentService.createTextOutput(JSON.stringify({
       status: "success",
-      message: "Successfully pushed " + leads.length + " leads to Google Sheet!",
+      message: "Successfully pushed " + leads.length + " leads (Name, Email, Company)!",
       count: leads.length
     })).setMimeType(ContentService.MimeType.JSON);
     
@@ -81,6 +64,24 @@ function doPost(e) {
 }
 """
 
+def prepare_leads_payload(leads: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Normalizes leads to strictly ensure name, email, company are top-level."""
+    formatted = []
+    for l in leads:
+        full_name = l.get("full_name") or f"{l.get('first_name', '')} {l.get('last_name', '')}".strip()
+        formatted.append({
+            "name": full_name,
+            "full_name": full_name,
+            "email": l.get("email", ""),
+            "company": l.get("company", ""),
+            # Keep original fields for backwards compatibility
+            "first_name": l.get("first_name", ""),
+            "last_name": l.get("last_name", ""),
+            "job_title": l.get("job_title", ""),
+            "linkedin_url": l.get("linkedin_url", "")
+        })
+    return formatted
+
 def push_to_webhook(webhook_url: str, leads: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
     Pushes leads to Google Apps Script Webhook URL.
@@ -88,10 +89,12 @@ def push_to_webhook(webhook_url: str, leads: List[Dict[str, Any]]) -> Dict[str, 
     if not webhook_url or not webhook_url.startswith("http"):
         return {"success": False, "error": "Invalid Webhook URL provided."}
     
+    payload_leads = prepare_leads_payload(leads)
+    
     try:
         # Google Apps Script web apps return 302 redirects which need to be followed
         with httpx.Client(timeout=20.0, follow_redirects=True) as client:
-            resp = client.post(webhook_url, json={"leads": leads})
+            resp = client.post(webhook_url, json={"leads": payload_leads})
             
             if resp.status_code in [200, 201]:
                 try:
@@ -114,6 +117,7 @@ def push_to_service_account(
 ) -> Dict[str, Any]:
     """
     Pushes leads using Google Cloud Service Account credentials JSON via gspread.
+    Format: Name | Email | Company
     """
     try:
         scopes = [
@@ -130,25 +134,16 @@ def push_to_service_account(
             
         worksheet = sh.get_worksheet(0)
         
-        # Check if empty, append header
+        # Check if empty, append header (Name, Email, Company)
         existing = worksheet.get_all_values()
         if not existing:
-            worksheet.append_row([
-                "First Name", "Last Name", "Email Address", "Job Title",
-                "Company", "LinkedIn Profile", "Email Confidence", "Date Added"
-            ])
+            worksheet.append_row(["Name", "Email", "Company"])
             
-        today = datetime.date.today().isoformat()
         rows = [
             [
-                l.get("first_name", ""),
-                l.get("last_name", ""),
+                l.get("full_name") or f"{l.get('first_name', '')} {l.get('last_name', '')}".strip(),
                 l.get("email", ""),
-                l.get("job_title", ""),
-                l.get("company", ""),
-                l.get("linkedin_url", ""),
-                l.get("confidence", ""),
-                today
+                l.get("company", "")
             ]
             for l in leads
         ]
@@ -159,39 +154,21 @@ def push_to_service_account(
 
 def generate_yamm_csv(leads: List[Dict[str, Any]]) -> str:
     """
-    Generates a CSV string formatted specifically for Yet Another Mail Merge (YAMM).
-    Standard YAMM Merge Tags:
-    - {{First Name}}
-    - {{Last Name}}
-    - {{Job Title}}
-    - {{Company}}
+    Generates a CSV string formatted strictly with 3 columns:
+    Name, Email, Company
     """
     output = io.StringIO()
     writer = csv.writer(output, quoting=csv.QUOTE_MINIMAL)
     
-    headers = [
-        "First Name",
-        "Last Name",
-        "Email Address",
-        "Job Title",
-        "Company",
-        "LinkedIn Profile",
-        "Email Confidence",
-        "Date Added"
-    ]
+    headers = ["Name", "Email", "Company"]
     writer.writerow(headers)
     
-    today = datetime.date.today().isoformat()
     for lead in leads:
+        full_name = lead.get("full_name") or f"{lead.get('first_name', '')} {lead.get('last_name', '')}".strip()
         writer.writerow([
-            lead.get("first_name", ""),
-            lead.get("last_name", ""),
+            full_name,
             lead.get("email", ""),
-            lead.get("job_title", ""),
-            lead.get("company", ""),
-            lead.get("linkedin_url", ""),
-            lead.get("confidence", ""),
-            today
+            lead.get("company", "")
         ])
         
     return output.getvalue()
