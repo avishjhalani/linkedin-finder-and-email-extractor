@@ -9,7 +9,8 @@ from app.email_extractor import (
     parse_person_name,
     generate_email_permutations,
     extract_email_from_text,
-    query_hunter_io
+    query_hunter_io,
+    query_apollo_io
 )
 
 def clean_linkedin_url(raw_url: str) -> str:
@@ -70,7 +71,8 @@ def search_linkedin_leads(
     location: str = "",
     preferred_pattern: str = "first.last",
     custom_domain: Optional[str] = None,
-    hunter_api_key: Optional[str] = None
+    hunter_api_key: Optional[str] = None,
+    apollo_api_key: Optional[str] = None
 ) -> Dict[str, Any]:
     """
     Discovers LinkedIn profiles using X-Ray search and enriches with emails.
@@ -186,13 +188,27 @@ def search_linkedin_leads(
                 # 3. Email Extraction & Generation
                 permutations = generate_email_permutations(first_name, last_name, domain)
                 
-                # Check 1: Hunter.io enrichment if API key provided
+                # Check 1: Apollo.io enrichment if API key provided
+                apollo_data = query_apollo_io(
+                    first_name=first_name,
+                    last_name=last_name,
+                    domain=domain,
+                    organization_name=company,
+                    linkedin_url=clean_url,
+                    api_key=apollo_api_key
+                ) if apollo_api_key else None
+
+                # Check 2: Hunter.io enrichment if API key provided
                 hunter_data = query_hunter_io(first_name, last_name, domain, hunter_api_key) if hunter_api_key else None
                 
-                # Check 2: Snippet public email
+                # Check 3: Snippet public email
                 bio_email = extract_email_from_text(snippet, domain)
                 
-                if hunter_data:
+                if apollo_data:
+                    final_email = apollo_data['email']
+                    confidence = apollo_data['confidence']
+                    email_source = "apollo"
+                elif hunter_data:
                     final_email = hunter_data['email']
                     confidence = hunter_data['confidence']
                     email_source = "hunter"

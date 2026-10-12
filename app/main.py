@@ -28,6 +28,7 @@ def load_config() -> Dict[str, Any]:
             pass
     return {
         "webhook_url": "",
+        "apollo_api_key": "",
         "hunter_api_key": "",
         "default_pattern": "first.last",
         "service_account_path": "",
@@ -68,6 +69,7 @@ class CsvExportRequest(BaseModel):
 
 class ConfigUpdateRequest(BaseModel):
     webhook_url: Optional[str] = ""
+    apollo_api_key: Optional[str] = ""
     hunter_api_key: Optional[str] = ""
     default_pattern: Optional[str] = "first.last"
     service_account_path: Optional[str] = ""
@@ -89,6 +91,7 @@ def api_parse_query(req: QueryParseRequest):
 def api_search(req: SearchRequest):
     cfg = load_config()
     hunter_key = cfg.get("hunter_api_key", "").strip() or None
+    apollo_key = cfg.get("apollo_api_key", "").strip() or None
     
     try:
         results = search_linkedin_leads(
@@ -98,7 +101,8 @@ def api_search(req: SearchRequest):
             location=req.location or "",
             preferred_pattern=req.preferred_pattern or cfg.get("default_pattern", "first.last"),
             custom_domain=req.custom_domain or None,
-            hunter_api_key=hunter_key
+            hunter_api_key=hunter_key,
+            apollo_api_key=apollo_key
         )
         return results
     except Exception as e:

@@ -40,6 +40,7 @@ const btnSaveSettings = document.getElementById("btnSaveSettings");
 const btnCopyScript = document.getElementById("btnCopyScript");
 const appsScriptCode = document.getElementById("appsScriptCode");
 const cfgWebhookUrl = document.getElementById("cfgWebhookUrl");
+const cfgApolloKey = document.getElementById("cfgApolloKey");
 const cfgHunterKey = document.getElementById("cfgHunterKey");
 const cfgDefaultPattern = document.getElementById("cfgDefaultPattern");
 const pushWebhookUrlInput = document.getElementById("pushWebhookUrlInput");
@@ -73,6 +74,7 @@ async function initApp() {
     if (res.ok) {
       appConfig = await res.json();
       cfgWebhookUrl.value = appConfig.webhook_url || "";
+      if (cfgApolloKey) cfgApolloKey.value = appConfig.apollo_api_key || "";
       cfgHunterKey.value = appConfig.hunter_api_key || "";
       cfgDefaultPattern.value = appConfig.default_pattern || "first.last";
       pushWebhookUrlInput.value = appConfig.webhook_url || "";
@@ -231,7 +233,8 @@ function renderLeadsTable(leads) {
     
     // Determine badge class
     let badgeClass = "badge-pattern";
-    if (lead.email_source === "bio") badgeClass = "badge-bio";
+    if (lead.email_source === "apollo") badgeClass = "badge-apollo";
+    else if (lead.email_source === "bio") badgeClass = "badge-bio";
     else if (lead.email_source === "hunter") badgeClass = "badge-hunter";
     else if (lead.confidence.includes("MX Verified")) badgeClass = "badge-mx";
 
@@ -504,6 +507,7 @@ btnOpenSettings.addEventListener("click", () => {
 
 btnSaveSettings.addEventListener("click", async () => {
   appConfig.webhook_url = cfgWebhookUrl.value.trim();
+  if (cfgApolloKey) appConfig.apollo_api_key = cfgApolloKey.value.trim();
   appConfig.hunter_api_key = cfgHunterKey.value.trim();
   appConfig.default_pattern = cfgDefaultPattern.value;
 

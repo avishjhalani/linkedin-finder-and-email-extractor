@@ -58,3 +58,9 @@ input:focus, select:focus {
   color: #c084fc;
   border: 1px solid rgba(168, 85, 247, 0.25);
 }
+
+.badge-apollo {
+  background-color: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
