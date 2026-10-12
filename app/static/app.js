@@ -215,7 +215,6 @@ async function executeSearch() {
 function renderLeadsTable(leads) {
   leadsTableBody.innerHTML = "";
   resultsCountBadge.textContent = `${leads.length} Leads`;
-  updateSelectedCount();
 
   if (leads.length === 0) {
     leadsTableBody.innerHTML = `
@@ -324,6 +323,7 @@ function renderLeadsTable(leads) {
 
   // Attach dynamic row event listeners
   attachRowListeners();
+  updateSelectedCount();
 }
 
 function attachRowListeners() {
