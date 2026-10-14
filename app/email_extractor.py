@@ -50,6 +50,23 @@ KNOWN_COMPANY_DOMAINS = {
     "spotify": "spotify.com"
 }
 
+def safe_ddgs_search(query: str, max_results: int = 15) -> List[Dict[str, Any]]:
+    """
+    Executes search with multi-backend fallback:
+    1. backend='api' (JSON API - fast, bypasses datacenter HTML blocks on cloud hosts like Render)
+    2. backend='lite' (lite.duckduckgo.com fallback)
+    3. backend='html' (standard fallback)
+    """
+    for backend in ["api", "lite", "html"]:
+        try:
+            ddgs = DDGS(timeout=8)
+            results = list(ddgs.text(query, backend=backend, max_results=max_results))
+            if results:
+                return results
+        except Exception:
+            continue
+    return []
+
 def resolve_company_domain(company_name: str, apollo_api_key: Optional[str] = None) -> str:
     """Finds the primary domain for a given company name."""
     clean_name = company_name.strip().lower()
@@ -65,7 +82,7 @@ def resolve_company_domain(company_name: str, apollo_api_key: Optional[str] = No
     # Search web for official website
     query = f'"{company_name}" official website'
     try:
-        results = list(DDGS().text(query, max_results=5))
+        results = safe_ddgs_search(query, max_results=5)
         ignored = [
             'wikipedia.org', 'linkedin.com', 'facebook.com', 'twitter.com',
             'x.com', 'youtube.com', 'glassdoor.com', 'indeed.com',

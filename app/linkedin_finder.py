@@ -10,7 +10,8 @@ from app.email_extractor import (
     generate_email_permutations,
     extract_email_from_text,
     query_hunter_io,
-    query_apollo_io
+    query_apollo_io,
+    safe_ddgs_search
 )
 
 def clean_linkedin_url(raw_url: str) -> str:
@@ -114,15 +115,13 @@ def search_linkedin_leads(
     seen_names = set()
     leads = []
     
-    ddgs = DDGS()
-    
     for q in queries:
         if len(leads) >= count:
             break
         try:
             # Request extra results to account for deduplication
             fetch_limit = min(max(count * 2, 15), 50)
-            raw_results = list(ddgs.text(q, max_results=fetch_limit))
+            raw_results = safe_ddgs_search(q, max_results=fetch_limit)
             
             for item in raw_results:
                 if len(leads) >= count:
