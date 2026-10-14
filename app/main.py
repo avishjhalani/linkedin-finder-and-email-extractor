@@ -236,6 +236,14 @@ def health_check():
 static_dir = Path(__file__).parent / "static"
 app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
+@app.head("/")
+def head_root():
+    return Response(status_code=200)
+
+@app.get("/favicon.ico")
+def get_favicon():
+    return Response(content=b"", media_type="image/x-icon")
+
 @app.get("/")
 def serve_index():
     index_file = static_dir / "index.html"
