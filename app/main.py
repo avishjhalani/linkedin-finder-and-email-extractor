@@ -245,9 +245,10 @@ def health_check():
 def api_debug_search(q: str = "site:in.linkedin.com/in/ amazon recruiters"):
     import time
     from ddgs import DDGS
+    from app.email_extractor import safe_ddgs_search
     debug_log = []
     
-    for backend in ["yahoo", "bing", "duckduckgo"]:
+    for backend in ["yandex", "yahoo", "bing", "duckduckgo"]:
         t0 = time.time()
         try:
             d = DDGS(timeout=4)
@@ -265,7 +266,15 @@ def api_debug_search(q: str = "site:in.linkedin.com/in/ amazon recruiters"):
                 "error": str(e)
             })
             
-    return {"query": q, "results": debug_log}
+    t_safe = time.time()
+    safe_results = safe_ddgs_search(q, max_results=5)
+    return {
+        "query": q,
+        "engine_tests": debug_log,
+        "safe_search_time": f"{time.time()-t_safe:.2f}s",
+        "safe_search_count": len(safe_results),
+        "safe_search_samples": safe_results[:2]
+    }
 
 # Mount static files
 static_dir = Path(__file__).parent / "static"

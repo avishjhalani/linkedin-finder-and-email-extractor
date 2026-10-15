@@ -59,9 +59,10 @@ def safe_ddgs_search(
     """
     Executes resilient multi-engine search:
     1. Serper API (if SERPER_API_KEY provided or in environment) - searches Google directly with 0 datacenter blocks.
-    2. Yahoo engine via DDGS (backend='yahoo') - fast, reliable on cloud hosts like Render/AWS.
-    3. Bing engine via DDGS (backend='bing') - reliable on cloud hosts.
-    4. Auto / DuckDuckGo fallback.
+    2. Google Custom Search (if GOOGLE_CSE_KEY and GOOGLE_CSE_CX provided) - 100 free queries/day.
+    3. Yandex engine via DDGS (backend='yandex') - fast, completely unblocked on cloud datacenters (Render/AWS).
+    4. Yahoo & Bing fallback.
+    5. Auto / DuckDuckGo fallback.
     """
     # 1. Check Serper API (Free 2,500 Google queries)
     api_key = serper_api_key or os.getenv("SERPER_API_KEY")
@@ -87,14 +88,41 @@ def safe_ddgs_search(
         except Exception:
             pass
 
-    # 2. Free search engines: Yahoo, Bing, Auto, DuckDuckGo
-    # Yahoo and Bing do NOT block AWS/Render cloud IPs like DuckDuckGo does
-    for backend in ["yahoo", "bing", "auto", "duckduckgo"]:
+    # 2. Check Google Custom Search (100 free/day)
+    cse_key = os.getenv("GOOGLE_CSE_KEY")
+    cse_cx = os.getenv("GOOGLE_CSE_CX")
+    if cse_key and cse_cx:
         try:
-            ddgs = DDGS(timeout=5)
+            url = f"https://www.googleapis.com/customsearch/v1?key={cse_key}&cx={cse_cx}&q={urllib.parse.quote(query)}&num={min(max_results, 10)}"
+            with httpx.Client(timeout=4.0) as client:
+                resp = client.get(url)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    results = []
+                    for item in data.get("items", []):
+                        results.append({
+                            "title": item.get("title", ""),
+                            "href": item.get("link", ""),
+                            "body": item.get("snippet", "")
+                        })
+                    if results:
+                        return results
+        except Exception:
+            pass
+
+    # 3. Free search engines: Yandex, Yahoo, Bing, Auto, DuckDuckGo
+    # Yandex does NOT block AWS/Render cloud IPs and returns genuine LinkedIn profiles
+    is_linkedin_search = "linkedin.com" in query.lower()
+    for backend in ["yandex", "yahoo", "bing", "auto", "duckduckgo"]:
+        try:
+            ddgs = DDGS(timeout=4)
             results = list(ddgs.text(query, backend=backend, max_results=max_results))
             if results:
-                return results
+                if is_linkedin_search:
+                    if any("linkedin.com/in/" in r.get("href", "").lower() for r in results):
+                        return results
+                else:
+                    return results
         except Exception:
             continue
     return []
@@ -313,7 +341,7 @@ def query_apollo_io(
         if linkedin_url:
             payload["linkedin_url"] = linkedin_url
 
-        with httpx.Client(timeout=8.0) as client:
+        with httpx.Client(timeout=3.0) as client:
             resp = client.post(url, json=payload, headers=headers)
             if resp.status_code == 200:
                 person = resp.json().get("person") or {}
