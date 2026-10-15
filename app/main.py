@@ -241,6 +241,32 @@ def api_get_script_template():
 def health_check():
     return {"status": "healthy", "service": "linkedin-finder"}
 
+@app.get("/api/debug-search")
+def api_debug_search(q: str = "site:in.linkedin.com/in/ amazon recruiters"):
+    import time
+    from ddgs import DDGS
+    debug_log = []
+    
+    for backend in ["yahoo", "bing", "duckduckgo"]:
+        t0 = time.time()
+        try:
+            d = DDGS(timeout=4)
+            res = list(d.text(q, backend=backend, max_results=3))
+            debug_log.append({
+                "backend": backend,
+                "time": f"{time.time()-t0:.2f}s",
+                "count": len(res),
+                "samples": [r.get("href") for r in res[:2]]
+            })
+        except Exception as e:
+            debug_log.append({
+                "backend": backend,
+                "time": f"{time.time()-t0:.2f}s",
+                "error": str(e)
+            })
+            
+    return {"query": q, "results": debug_log}
+
 # Mount static files
 static_dir = Path(__file__).parent / "static"
 app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
