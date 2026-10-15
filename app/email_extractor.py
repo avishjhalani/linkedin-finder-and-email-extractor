@@ -1,3 +1,4 @@
+import os
 import re
 import urllib.parse
 from typing import Dict, List, Tuple, Optional, Any
@@ -50,16 +51,47 @@ KNOWN_COMPANY_DOMAINS = {
     "spotify": "spotify.com"
 }
 
-def safe_ddgs_search(query: str, max_results: int = 15) -> List[Dict[str, Any]]:
+def safe_ddgs_search(
+    query: str,
+    max_results: int = 15,
+    serper_api_key: Optional[str] = None
+) -> List[Dict[str, Any]]:
     """
-    Executes search with multi-backend fallback:
-    1. backend='api' (JSON API - fast, bypasses datacenter HTML blocks on cloud hosts like Render)
-    2. backend='lite' (lite.duckduckgo.com fallback)
-    3. backend='html' (standard fallback)
+    Executes resilient multi-engine search:
+    1. Serper API (if SERPER_API_KEY provided or in environment) - searches Google directly with 0 datacenter blocks.
+    2. Yahoo engine via DDGS (backend='yahoo') - fast, reliable on cloud hosts like Render/AWS.
+    3. Bing engine via DDGS (backend='bing') - reliable on cloud hosts.
+    4. Auto / DuckDuckGo fallback.
     """
-    for backend in ["api", "lite", "html"]:
+    # 1. Check Serper API (Free 2,500 Google queries)
+    api_key = serper_api_key or os.getenv("SERPER_API_KEY")
+    if api_key:
         try:
-            ddgs = DDGS(timeout=8)
+            with httpx.Client(timeout=4.0) as client:
+                resp = client.post(
+                    "https://google.serper.dev/search",
+                    headers={"X-API-KEY": api_key, "Content-Type": "application/json"},
+                    json={"q": query, "num": max_results}
+                )
+                if resp.status_code == 200:
+                    data = resp.json()
+                    results = []
+                    for item in data.get("organic", []):
+                        results.append({
+                            "title": item.get("title", ""),
+                            "href": item.get("link", ""),
+                            "body": item.get("snippet", "")
+                        })
+                    if results:
+                        return results
+        except Exception:
+            pass
+
+    # 2. Free search engines: Yahoo, Bing, Auto, DuckDuckGo
+    # Yahoo and Bing do NOT block AWS/Render cloud IPs like DuckDuckGo does
+    for backend in ["yahoo", "bing", "auto", "duckduckgo"]:
+        try:
+            ddgs = DDGS(timeout=5)
             results = list(ddgs.text(query, backend=backend, max_results=max_results))
             if results:
                 return results

@@ -36,15 +36,17 @@ def clean_linkedin_url(raw_url: str) -> str:
 
 def clean_headline(title_part: str, snippet: str, company: str) -> str:
     """Extracts a neat headline / job title from search result."""
+    title_part = title_part.replace('\ufffd', ' - ').replace('', ' - ')
     # Remove " | LinkedIn" and any subsequent titles
     cleaned = re.split(r'\s*\|\s*LinkedIn', title_part, flags=re.IGNORECASE)[0].strip()
     # If title has multiple separators like ' - '
     parts = cleaned.split(' - ')
     headline = parts[1].strip() if len(parts) >= 2 else cleaned
     
-    # Remove trailing ellipses or trailing names that bleed in DDG
+    # Remove trailing ellipses or trailing names that bleed in search engines
     headline = headline.split('...')[0].strip()
     headline = headline.split(' | ')[0].strip()
+    headline = headline.split(' – ')[0].strip()
     
     # Clean redundant trailing company mentions if messy
     headline = re.sub(r'\s*@\s*LinkedIn.*$', '', headline, flags=re.IGNORECASE)
@@ -73,7 +75,8 @@ def search_linkedin_leads(
     preferred_pattern: str = "first.last",
     custom_domain: Optional[str] = None,
     hunter_api_key: Optional[str] = None,
-    apollo_api_key: Optional[str] = None
+    apollo_api_key: Optional[str] = None,
+    serper_api_key: Optional[str] = None
 ) -> Dict[str, Any]:
     """
     Discovers LinkedIn profiles using X-Ray search and enriches with emails.
@@ -88,6 +91,8 @@ def search_linkedin_leads(
     
     if loc_clean == "india":
         # Targeted India queries
+        queries.append(f'site:in.linkedin.com/in/ "{company}" "{role}"')
+        queries.append(f'site:in.linkedin.com/in/ {company} {role}')
         queries.append(f'site:in.linkedin.com/in/ "{company}" ("{role}" OR "Human Resources" OR "Talent Acquisition")')
         queries.append(f'site:linkedin.com/in/ "{company}" ("{role}" OR "Human Resources") "India"')
         queries.append(f'site:linkedin.com/in/ "{company}" "{role}" (Bengaluru OR Hyderabad OR Gurgaon OR Noida OR India)')
@@ -121,7 +126,7 @@ def search_linkedin_leads(
         try:
             # Request extra results to account for deduplication
             fetch_limit = min(max(count * 2, 15), 50)
-            raw_results = safe_ddgs_search(q, max_results=fetch_limit)
+            raw_results = safe_ddgs_search(q, max_results=fetch_limit, serper_api_key=serper_api_key)
             
             for item in raw_results:
                 if len(leads) >= count:
@@ -174,6 +179,8 @@ def search_linkedin_leads(
                 last_name = name_info['last_name']
                 
                 if not first_name or len(first_name) < 2:
+                    continue
+                if first_name.lower() in ['linkedin', 'profile', 'profiles', 'top', 'jobs', 'find', 'the', 'best', 'directory']:
                     continue
                 if full_name.lower() in seen_names:
                     continue

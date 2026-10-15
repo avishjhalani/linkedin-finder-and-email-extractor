@@ -55,6 +55,7 @@ def get_effective_config() -> Dict[str, Any]:
         "webhook_url": os.getenv("GOOGLE_WEBHOOK_URL") or disk.get("webhook_url", ""),
         "apollo_api_key": os.getenv("APOLLO_API_KEY") or disk.get("apollo_api_key", ""),
         "hunter_api_key": os.getenv("HUNTER_API_KEY") or disk.get("hunter_api_key", ""),
+        "serper_api_key": os.getenv("SERPER_API_KEY") or disk.get("serper_api_key", ""),
         "default_pattern": os.getenv("DEFAULT_PATTERN") or disk.get("default_pattern", "first.last"),
         "service_account_path": disk.get("service_account_path", ""),
         "spreadsheet_id": disk.get("spreadsheet_id", "")
@@ -106,6 +107,7 @@ class ConfigUpdateRequest(BaseModel):
     webhook_url: Optional[str] = ""
     apollo_api_key: Optional[str] = ""
     hunter_api_key: Optional[str] = ""
+    serper_api_key: Optional[str] = ""
     default_pattern: Optional[str] = "first.last"
     service_account_path: Optional[str] = ""
     spreadsheet_id: Optional[str] = ""
@@ -128,6 +130,7 @@ def api_search(req: SearchRequest):
     cfg = get_effective_config()
     hunter_key = cfg.get("hunter_api_key", "").strip() or None
     apollo_key = cfg.get("apollo_api_key", "").strip() or None
+    serper_key = cfg.get("serper_api_key", "").strip() or None
     
     try:
         results = search_linkedin_leads(
@@ -138,7 +141,8 @@ def api_search(req: SearchRequest):
             preferred_pattern=req.preferred_pattern or cfg.get("default_pattern", "first.last"),
             custom_domain=req.custom_domain or None,
             hunter_api_key=hunter_key,
-            apollo_api_key=apollo_key
+            apollo_api_key=apollo_key,
+            serper_api_key=serper_key
         )
         return results
     except Exception as e:
@@ -201,9 +205,12 @@ def api_get_config():
         "apollo_masked": mask_secret(cfg.get("apollo_api_key", "")),
         "hunter_configured": bool(cfg.get("hunter_api_key")),
         "hunter_masked": mask_secret(cfg.get("hunter_api_key", "")),
+        "serper_configured": bool(cfg.get("serper_api_key")),
+        "serper_masked": mask_secret(cfg.get("serper_api_key", "")),
         "default_pattern": cfg.get("default_pattern", "first.last"),
         "is_env_webhook": bool(os.getenv("GOOGLE_WEBHOOK_URL")),
-        "is_env_apollo": bool(os.getenv("APOLLO_API_KEY"))
+        "is_env_apollo": bool(os.getenv("APOLLO_API_KEY")),
+        "is_env_serper": bool(os.getenv("SERPER_API_KEY"))
     }
 
 @app.post("/api/config")
@@ -218,6 +225,8 @@ def api_update_config(req: ConfigUpdateRequest):
         disk["apollo_api_key"] = req.apollo_api_key.strip()
     if req.hunter_api_key and "••••" not in req.hunter_api_key:
         disk["hunter_api_key"] = req.hunter_api_key.strip()
+    if req.serper_api_key and "••••" not in req.serper_api_key:
+        disk["serper_api_key"] = req.serper_api_key.strip()
     if req.default_pattern:
         disk["default_pattern"] = req.default_pattern
         
