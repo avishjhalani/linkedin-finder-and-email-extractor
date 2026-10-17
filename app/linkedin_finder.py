@@ -92,19 +92,14 @@ def search_linkedin_leads(
     if loc_clean == "india":
         # Targeted India queries
         queries.append(f'site:in.linkedin.com/in/ "{company}" "{role}"')
-        queries.append(f'site:in.linkedin.com/in/ {company} {role}')
-        queries.append(f'site:in.linkedin.com/in/ "{company}" ("{role}" OR "Human Resources" OR "Talent Acquisition")')
-        queries.append(f'site:linkedin.com/in/ "{company}" ("{role}" OR "Human Resources") "India"')
-        queries.append(f'site:linkedin.com/in/ "{company}" "{role}" (Bengaluru OR Hyderabad OR Gurgaon OR Noida OR India)')
+        queries.append(f'site:linkedin.com/in/ "{company}" "{role}" "India"')
     elif location:
         loc_part = f'"{location}"'
         queries.append(f'site:linkedin.com/in/ "{company}" "{role}" {loc_part}'.strip())
         queries.append(f'site:linkedin.com/in/ "{company}" {role} {loc_part}'.strip())
-        queries.append(f'site:linkedin.com/in/ {company} {role} {loc_part}'.strip())
     else:
         queries.append(f'site:linkedin.com/in/ "{company}" "{role}"'.strip())
         queries.append(f'site:linkedin.com/in/ "{company}" {role}'.strip())
-        queries.append(f'site:linkedin.com/in/ {company} {role}'.strip())
 
     foreign_domains = [
         'uk.linkedin.com', 'us.linkedin.com', 'au.linkedin.com', 'ca.linkedin.com',

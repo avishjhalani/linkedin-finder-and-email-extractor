@@ -110,12 +110,11 @@ def safe_ddgs_search(
         except Exception:
             pass
 
-    # 3. Free search engines: Yandex, Yahoo, Bing, Auto, DuckDuckGo
-    # Yandex does NOT block AWS/Render cloud IPs and returns genuine LinkedIn profiles
+    # 3. Free search engines: DuckDuckGo, Bing, Yahoo
     is_linkedin_search = "linkedin.com" in query.lower()
-    for backend in ["yandex", "yahoo", "bing", "auto", "duckduckgo"]:
+    for backend in ["duckduckgo", "bing", "yahoo"]:
         try:
-            ddgs = DDGS(timeout=4)
+            ddgs = DDGS(timeout=3)
             results = list(ddgs.text(query, backend=backend, max_results=max_results))
             if results:
                 if is_linkedin_search:

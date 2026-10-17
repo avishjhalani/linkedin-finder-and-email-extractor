@@ -74,6 +74,8 @@ async function initApp() {
     if (res.ok) {
       appConfig = await res.json();
       cfgWebhookUrl.value = appConfig.webhook_masked || "";
+      const cfgSerper = document.getElementById("cfgSerperKey");
+      if (cfgSerper) cfgSerper.value = appConfig.serper_masked || "";
       if (cfgApolloKey) cfgApolloKey.value = appConfig.apollo_masked || "";
       cfgHunterKey.value = appConfig.hunter_masked || "";
       cfgDefaultPattern.value = appConfig.default_pattern || "first.last";
@@ -217,10 +219,36 @@ function renderLeadsTable(leads) {
   resultsCountBadge.textContent = `${leads.length} Leads`;
 
   if (leads.length === 0) {
+    const hasSearchKey = Boolean(appConfig.serper_configured);
     leadsTableBody.innerHTML = `
       <tr>
-        <td colspan="6" class="text-center py-8 text-slate-400">
-          No LinkedIn profiles found matching these parameters. Try broadening your job role or company query.
+        <td colspan="6" class="text-center py-10 px-4">
+          <div class="max-w-md mx-auto space-y-3">
+            <div class="w-12 h-12 mx-auto rounded-full ${hasSearchKey ? 'bg-slate-800 text-slate-400' : 'bg-amber-500/10 text-amber-400'} flex items-center justify-center text-xl">
+              <i class="fa-solid ${hasSearchKey ? 'fa-magnifying-glass' : 'fa-cloud-bolt'}"></i>
+            </div>
+            <h4 class="text-white font-bold text-sm">
+              ${hasSearchKey ? 'No Leads Found Matching Query' : '0 Leads Found (Cloud Bot Protection)'}
+            </h4>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              ${hasSearchKey 
+                ? 'Try broadening your role, company name, or changing location filters.' 
+                : 'When hosted on Render, search engines require a free Search API Key to bypass anti-bot challenges.'}
+            </p>
+            ${!hasSearchKey ? `
+              <div class="pt-2 flex flex-col sm:flex-row items-center justify-center gap-2">
+                <a href="https://serper.dev" target="_blank" class="px-3.5 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:opacity-90 text-white rounded-lg text-xs font-semibold shadow flex items-center gap-1.5 transition">
+                  <i class="fa-solid fa-key"></i> Get 2,500 Free Searches
+                </a>
+                <button onclick="document.getElementById('btnOpenSettings').click()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold border border-slate-700 transition">
+                  Enter Key in Settings
+                </button>
+              </div>
+              <p class="text-[11px] text-slate-500 pt-1">
+                Tip: Run <strong>run.bat</strong> on your computer for 100% free unlimited searches without any API key!
+              </p>
+            ` : ''}
+          </div>
         </td>
       </tr>
     `;
@@ -515,6 +543,12 @@ btnSaveSettings.addEventListener("click", async () => {
   if (cfgApolloKey) {
     const apolloVal = cfgApolloKey.value.trim();
     if (apolloVal && !apolloVal.includes("••••")) payload.apollo_api_key = apolloVal;
+  }
+
+  const serperInput = document.getElementById("cfgSerperKey");
+  if (serperInput) {
+    const serperVal = serperInput.value.trim();
+    if (serperVal && !serperVal.includes("••••")) payload.serper_api_key = serperVal;
   }
 
   const hunterVal = cfgHunterKey.value.trim();
