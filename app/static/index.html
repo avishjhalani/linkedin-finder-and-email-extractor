@@ -3,176 +3,201 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LinkedIn Lead Finder & Email Extractor | YAMM Ready</title>
-  <!-- Tailwind CSS CDN -->
+  <title>LinkedIn HR & Executive Email Finder | India</title>
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome Icons -->
+  <!-- FontAwesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
 
-  <!-- Top Navbar -->
-  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40">
+  <!-- Ambient Glow Effects -->
+  <div class="fixed top-0 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed top-1/3 right-1/4 w-96 h-96 bg-cyan-600/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+  <!-- Top Navigation Bar -->
+  <header class="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md sticky top-0 z-40">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/20 text-white font-bold text-lg">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/20 text-white text-lg font-bold">
           <i class="fa-brands fa-linkedin-in"></i>
         </div>
         <div>
-          <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
-            LinkedIn Finder <span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 font-medium">YAMM Ready</span>
-          </h1>
-          <p class="text-xs text-slate-400">Discover Profiles, Extract Emails & Push to Google Sheets</p>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base font-extrabold tracking-tight text-white">HR & Executive Lead Finder</h1>
+            <span class="text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">India v2.0</span>
+          </div>
+          <p class="text-xs text-slate-400">High-deliverability recruiter contacts for Google Sheets & cold email</p>
         </div>
       </div>
 
-      <div class="flex items-center space-x-3">
-        <button id="btnOpenGuide" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-2">
-          <i class="fa-solid fa-file-lines text-emerald-400"></i> Google Sheets & YAMM Guide
+      <!-- Navigation Actions -->
+      <div class="flex items-center space-x-2">
+        <button id="btnOpenGuide" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold border border-slate-800 transition flex items-center gap-1.5 shadow-sm">
+          <i class="fa-solid fa-book-open text-blue-400"></i>
+          <span class="hidden sm:inline">Google Sheets Guide</span>
         </button>
-        <button id="btnOpenSettings" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-2">
-          <i class="fa-solid fa-sliders text-blue-400"></i> Settings
+        <button id="btnOpenSettings" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold border border-slate-800 transition flex items-center gap-1.5 shadow-sm">
+          <i class="fa-solid fa-sliders text-cyan-400"></i>
+          <span class="hidden sm:inline">Settings</span>
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Main Content Container -->
+  <!-- Main Container -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
-    <!-- Search Hero Box -->
-    <div class="bg-gradient-to-b from-slate-900 to-slate-900/60 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
-      <!-- Glow ambient effects -->
-      <div class="absolute -top-24 -right-24 w-72 h-72 bg-blue-600/15 rounded-full blur-3xl pointer-events-none"></div>
-      <div class="absolute -bottom-24 -left-24 w-72 h-72 bg-emerald-600/15 rounded-full blur-3xl pointer-events-none"></div>
-
-      <div class="max-w-3xl space-y-4">
-        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-          Who are you looking for today?
+    <!-- Search Card -->
+    <section class="glass-card rounded-2xl p-6 sm:p-8 relative overflow-hidden border border-slate-800/80 shadow-2xl">
+      <div class="max-w-3xl space-y-2">
+        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-2.5">
+          <span>Find Working Emails of HR & Talent Leaders</span>
+          <span class="text-xs font-semibold bg-blue-500/10 text-blue-400 px-2.5 py-1 rounded-full border border-blue-500/20">🇮🇳 India</span>
         </h2>
         <p class="text-sm text-slate-400">
-          Enter any natural language query like <span class="text-cyan-400 font-mono">"find 10 hr working at optum"</span> or customize the filters below.
+          Enter any company name to discover verified Senior Managers, HR, Talent Acquisition, HR Managers, and HR Heads across India.
         </p>
       </div>
 
-      <!-- Search Input Bar -->
+      <!-- Search Input & Trigger -->
       <div class="mt-6 flex flex-col sm:flex-row gap-3">
         <div class="relative flex-1">
           <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
-            <i class="fa-solid fa-magnifying-glass text-lg"></i>
+            <i class="fa-solid fa-building text-lg"></i>
           </div>
           <input 
             type="text" 
-            id="queryInput" 
-            placeholder="e.g. find 10 hr working at optum"
-            value="find 10 hr working at optum"
-            class="w-full pl-12 pr-4 py-4 bg-slate-950/80 border border-slate-700/80 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base shadow-inner transition font-medium"
+            id="companyInput" 
+            placeholder="Enter company name (e.g. Optum, Amazon, TCS, Infosys, Flipkart...)" 
+            value="Optum"
+            class="w-full pl-12 pr-4 py-3.5 bg-slate-950/80 border border-slate-700/80 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 text-base shadow-inner font-medium transition"
           >
-          <div id="parseBadge" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-slate-800 text-slate-400 px-2.5 py-1 rounded-md border border-slate-700">
-            Auto-parsed
-          </div>
         </div>
         <button 
           id="btnSearch" 
-          class="px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 active:scale-[0.98] text-white font-bold rounded-xl shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2.5 transition text-base"
+          class="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 active:scale-[0.98] text-white font-bold rounded-xl shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2.5 transition text-base"
         >
           <i class="fa-solid fa-bolt"></i>
-          <span>Find Leads</span>
+          <span>Extract Leads</span>
         </button>
       </div>
 
-      <!-- Quick Suggestion Chips -->
-      <div class="mt-4 flex flex-wrap items-center gap-2 text-xs text-slate-400">
-        <span class="font-medium text-slate-500">Try quick query:</span>
-        <button class="chip-btn px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" data-q="find 10 hr working at optum">
-          💼 10 HR at Optum
-        </button>
-        <button class="chip-btn px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" data-q="find 10 software engineers at google">
-          💻 10 Software Engineers at Google
-        </button>
-        <button class="chip-btn px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" data-q="find 10 recruiters working for amazon in seattle">
-          🎯 10 Recruiters at Amazon
-        </button>
-        <button class="chip-btn px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" data-q="find 10 marketing directors at microsoft">
-          📈 10 Marketing Directors at Microsoft
-        </button>
+      <!-- Quick Company Pills -->
+      <div class="mt-4 flex flex-wrap items-center gap-2 text-xs">
+        <span class="font-medium text-slate-500 mr-1">Quick Select:</span>
+        <button class="company-pill px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition" data-company="Optum">🏥 Optum</button>
+        <button class="company-pill px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition" data-company="Amazon">📦 Amazon</button>
+        <button class="company-pill px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition" data-company="TCS">💼 TCS</button>
+        <button class="company-pill px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition" data-company="Infosys">🏢 Infosys</button>
+        <button class="company-pill px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition" data-company="Flipkart">🛍️ Flipkart</button>
+        <button class="company-pill px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition" data-company="Accenture">🌐 Accenture</button>
+        <button class="company-pill px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition" data-company="Google">🔍 Google</button>
+        <button class="company-pill px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition" data-company="Microsoft">💻 Microsoft</button>
       </div>
 
-      <!-- Structured Parameters Drawer / Panel -->
-      <div class="mt-6 pt-6 border-t border-slate-800/80">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-xs uppercase tracking-wider font-bold text-slate-400 flex items-center gap-2">
-            <i class="fa-solid fa-sliders text-blue-400"></i> Search Filters & Email Pattern
-          </span>
-          <span id="domainStatusPill" class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
-            <i class="fa-solid fa-circle-check text-[10px]"></i> Domain: optum.com (MX Valid)
-          </span>
+      <!-- Filters Row -->
+      <div class="mt-6 pt-5 border-t border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <!-- Target Roles Checkboxes -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold uppercase tracking-wider text-slate-400 block">Target Roles (India):</label>
+          <div class="flex flex-wrap items-center gap-3 text-xs">
+            <label class="flex items-center gap-1.5 cursor-pointer text-slate-300 hover:text-white">
+              <input type="checkbox" value="Senior Manager" class="role-checkbox rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-0" checked>
+              <span>Senior Manager</span>
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer text-slate-300 hover:text-white">
+              <input type="checkbox" value="HR" class="role-checkbox rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-0" checked>
+              <span>HR</span>
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer text-slate-300 hover:text-white">
+              <input type="checkbox" value="Talent Acquisition" class="role-checkbox rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-0" checked>
+              <span>Talent Acquisition</span>
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer text-slate-300 hover:text-white">
+              <input type="checkbox" value="HR Manager" class="role-checkbox rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-0" checked>
+              <span>HR Manager</span>
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer text-slate-300 hover:text-white">
+              <input type="checkbox" value="HR Head" class="role-checkbox rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-0" checked>
+              <span>HR Head</span>
+            </label>
+          </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+        <!-- Count & Pattern -->
+        <div class="flex items-center gap-4 text-xs">
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Job Role</label>
-            <input type="text" id="paramRole" value="HR" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-200 focus:ring-1 focus:ring-blue-500 focus:outline-none">
+            <label class="block text-[11px] text-slate-400 font-semibold mb-1">Results Limit:</label>
+            <select id="countSelect" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-200 focus:ring-1 focus:ring-blue-500 focus:outline-none">
+              <option value="5">5 Leads</option>
+              <option value="10" selected>10 Leads</option>
+              <option value="15">15 Leads</option>
+              <option value="25">25 Leads</option>
+            </select>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Company</label>
-            <input type="text" id="paramCompany" value="Optum" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-200 focus:ring-1 focus:ring-blue-500 focus:outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Company Domain</label>
-            <input type="text" id="paramDomain" value="optum.com" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-200 focus:ring-1 focus:ring-blue-500 focus:outline-none" placeholder="e.g. optum.com">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Location (Optional)</label>
-            <input type="text" id="paramLocation" value="" placeholder="Any location" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-200 focus:ring-1 focus:ring-blue-500 focus:outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Count (1-50)</label>
-            <input type="number" id="paramCount" value="10" min="1" max="50" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-200 focus:ring-1 focus:ring-blue-500 focus:outline-none">
+            <label class="block text-[11px] text-slate-400 font-semibold mb-1">Corporate Pattern:</label>
+            <select id="patternSelect" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-200 focus:ring-1 focus:ring-blue-500 focus:outline-none font-mono">
+              <option value="first.last" selected>first.last (amit.vaish@...)</option>
+              <option value="flast">flast (avaish@...)</option>
+              <option value="firstlast">firstlast (amitvaish@...)</option>
+              <option value="first_last">first_last (amit_vaish@...)</option>
+              <option value="first">first (amit@...)</option>
+            </select>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Live Search State Bar -->
-    <div id="searchProgressBar" class="hidden bg-slate-900 border border-blue-500/30 rounded-xl p-5 shadow-lg flex items-center space-x-4 animate-pulse">
-      <div class="w-8 h-8 rounded-full border-2 border-blue-500 border-t-transparent animate-spin flex-shrink-0"></div>
-      <div class="flex-1">
-        <h4 id="progressStatusText" class="text-sm font-semibold text-white">Searching LinkedIn X-Ray & extracting profiles...</h4>
-        <p class="text-xs text-slate-400 mt-0.5">Querying LinkedIn indexes, verifying MX records, and generating clean contact details.</p>
+      <!-- Live Loading State -->
+      <div id="searchProgressBar" class="hidden absolute bottom-0 left-0 right-0 h-1 bg-slate-800 overflow-hidden">
+        <div class="h-full bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-500 animate-loading-bar"></div>
+      </div>
+    </section>
+
+    <!-- Company Verification & Domain Status Bar -->
+    <div id="companyStatusBar" class="hidden glass-card rounded-xl px-5 py-3 border border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div class="flex items-center gap-2.5">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="text-slate-400">Target Company Domain:</span>
+        <span id="detectedDomainBadge" class="font-mono text-cyan-300 font-bold bg-slate-900 px-2 py-0.5 rounded border border-slate-800">optum.com</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-slate-400">Corporate Mail Server:</span>
+        <span id="detectedProviderBadge" class="font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Proofpoint Enterprise (MX Active)</span>
       </div>
     </div>
 
     <!-- Results Section -->
-    <div id="resultsCard" class="hidden bg-slate-900 border border-slate-800 rounded-2xl shadow-xl overflow-hidden">
+    <section id="resultsCard" class="hidden glass-card rounded-2xl overflow-hidden border border-slate-800 shadow-2xl space-y-4">
       <!-- Results Action Bar -->
-      <div class="p-4 sm:p-5 border-b border-slate-800 bg-slate-900/90 flex flex-wrap items-center justify-between gap-4">
-        <div class="flex items-center space-x-3">
-          <span class="text-base font-bold text-white flex items-center gap-2">
-            <i class="fa-solid fa-users text-blue-400"></i> Discovered Leads
-          </span>
-          <span id="resultsCountBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
-            10 Leads
+      <div class="px-6 py-4 bg-slate-900/60 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <span id="resultsCountBadge" class="text-xs font-bold uppercase tracking-wider bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full border border-blue-500/20">
+            0 Leads Found
           </span>
           <span id="selectedCountText" class="text-xs text-slate-400">
-            (10 selected)
+            0 selected
           </span>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2">
-          <button id="btnPushToSheets" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg text-xs shadow-lg shadow-emerald-600/20 transition flex items-center gap-2 active:scale-95">
-            <i class="fa-solid fa-table-cells"></i>
-            <span>Push to Google Sheet</span>
+        <!-- 1-Click Action Buttons -->
+        <div class="flex items-center gap-2">
+          <button id="btnPushToSheets" class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-emerald-600/20 flex items-center gap-1.5 transition active:scale-95">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <span>Upload to Google Sheet</span>
           </button>
-
-          <button id="btnDownloadCsv" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold rounded-lg text-xs transition flex items-center gap-2 active:scale-95">
-            <i class="fa-solid fa-file-csv text-blue-400"></i>
-            <span>Download YAMM CSV</span>
+          <button id="btnDownloadCsv" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold border border-slate-700 flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-file-csv"></i>
+            <span>Download CSV (YAMM)</span>
           </button>
-
-          <button id="btnCopyEmails" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold rounded-lg text-xs transition flex items-center gap-2 active:scale-95">
-            <i class="fa-regular fa-copy text-amber-400"></i>
+          <button id="btnCopyEmails" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold border border-slate-700 flex items-center gap-1.5 transition">
+            <i class="fa-regular fa-copy"></i>
             <span>Copy Emails</span>
           </button>
         </div>
@@ -180,110 +205,87 @@
 
       <!-- Leads Table -->
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm text-slate-300">
-          <thead class="bg-slate-950/60 text-xs uppercase tracking-wider text-slate-400 border-b border-slate-800">
-            <tr>
-              <th scope="col" class="py-3.5 px-4 w-12 text-center">
-                <input type="checkbox" id="selectAllCheckbox" checked class="rounded border-slate-700 text-blue-600 focus:ring-0">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="border-b border-slate-800 bg-slate-950/40 text-slate-400 font-semibold uppercase tracking-wider">
+              <th class="py-3 px-4 w-12 text-center">
+                <input type="checkbox" id="selectAllCheckbox" checked class="rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-0 cursor-pointer">
               </th>
-              <th scope="col" class="py-3.5 px-4">Candidate</th>
-              <th scope="col" class="py-3.5 px-4">Headline / Role</th>
-              <th scope="col" class="py-3.5 px-4">Company</th>
-              <th scope="col" class="py-3.5 px-4 min-w-[280px]">Discovered Email & Status</th>
-              <th scope="col" class="py-3.5 px-4 text-right">Profile</th>
+              <th class="py-3 px-4">Contact</th>
+              <th class="py-3 px-4">Role / Title</th>
+              <th class="py-3 px-4">Company</th>
+              <th class="py-3 px-4">Email Address</th>
+              <th class="py-3 px-4 text-right">Deliverability</th>
             </tr>
           </thead>
-          <tbody id="leadsTableBody" class="divide-y divide-slate-800/60">
-            <!-- Populated via JavaScript -->
+          <tbody id="leadsTableBody" class="divide-y divide-slate-800/60 font-medium">
+            <!-- Rendered dynamically -->
           </tbody>
         </table>
       </div>
-    </div>
+    </section>
 
-    <!-- Empty State (Initial) -->
-    <div id="initialEmptyState" class="border border-dashed border-slate-800 rounded-2xl p-12 text-center space-y-4">
-      <div class="w-16 h-16 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center mx-auto text-2xl border border-blue-500/20">
-        <i class="fa-solid fa-sparkles"></i>
+    <!-- Empty State Preview -->
+    <div id="initialEmptyState" class="glass-card rounded-2xl p-12 text-center border border-slate-800/60 space-y-4">
+      <div class="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 mx-auto flex items-center justify-center text-2xl text-blue-400 shadow-inner">
+        <i class="fa-solid fa-magnifying-glass"></i>
       </div>
-      <div class="max-w-md mx-auto">
-        <h3 class="text-base font-semibold text-white">Ready to harvest LinkedIn leads</h3>
-        <p class="text-xs text-slate-400 mt-1">
-          Type your target role and company above (e.g. "find 10 hr working at optum") and hit "Find Leads". You can directly push results into your Google Sheet to run Yet Another Mail Merge campaigns!
+      <div class="max-w-md mx-auto space-y-2">
+        <h3 class="text-base font-bold text-white">Ready to Find Verified HR Leads</h3>
+        <p class="text-xs text-slate-400 leading-relaxed">
+          Type any company name above (or click a quick select chip) and click <strong>Extract Leads</strong> to find Senior Managers, HR, and Talent Acquisition leaders in India.
         </p>
       </div>
     </div>
 
   </main>
 
-  <!-- Google Sheets & YAMM Guide Modal -->
+  <!-- Google Sheets Guide Modal -->
   <div id="guideModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
-      <!-- Modal Header -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-xl w-full shadow-2xl overflow-hidden animate-scale-in">
       <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
         <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <i class="fa-solid fa-file-lines text-emerald-400"></i> Google Sheets & YAMM Setup Guide
+          <i class="fa-solid fa-table-cells text-emerald-400"></i> Google Sheets 1-Click Upload Setup
         </h3>
         <button class="modal-close text-slate-400 hover:text-white text-lg">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
 
-      <!-- Modal Body -->
-      <div class="p-6 overflow-y-auto space-y-6 text-sm text-slate-300">
-        
-        <!-- Option 1: Webhook (Recommended) -->
-        <div class="bg-slate-950/70 border border-emerald-500/30 rounded-xl p-5 space-y-4">
-          <div class="flex items-center justify-between">
-            <span class="text-xs uppercase font-bold tracking-wider text-emerald-400 flex items-center gap-2">
-              <i class="fa-solid fa-bolt"></i> Option 1: Instant Google Apps Script Webhook (Recommended - 60 Seconds)
-            </span>
-            <span class="text-[11px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">Zero OAuth Setup</span>
+      <div class="p-6 space-y-4 text-xs text-slate-300 max-h-[75vh] overflow-y-auto">
+        <div class="space-y-2">
+          <p class="font-semibold text-white">How it works:</p>
+          <p class="text-slate-400">
+            A free, zero-maintenance Google Apps Script Webhook automatically inserts rows directly into your Google Sheet with strictly 3 columns formatted for mail merge:
+          </p>
+          <div class="grid grid-cols-3 gap-2 text-center font-mono font-bold text-xs">
+            <div class="bg-slate-950 p-2 rounded border border-slate-800 text-cyan-400">Column A: Name</div>
+            <div class="bg-slate-950 p-2 rounded border border-slate-800 text-emerald-400">Column B: Email</div>
+            <div class="bg-slate-950 p-2 rounded border border-slate-800 text-cyan-400">Column C: Company</div>
           </div>
-
-          <ol class="list-decimal list-inside space-y-2 text-xs text-slate-300">
-            <li>Create or open a Google Sheet (e.g., named <code class="bg-slate-800 px-1 py-0.5 rounded text-cyan-300">Optum HR Leads</code>).</li>
-            <li>In the top menu, click <strong>Extensions</strong> &rarr; <strong>Apps Script</strong>.</li>
-            <li>Delete all code in the editor and paste the snippet below:</li>
-          </ol>
-
-          <!-- Code Box -->
-          <div class="relative">
-            <pre id="appsScriptCode" class="bg-slate-900 p-4 rounded-lg text-xs font-mono text-cyan-300 overflow-x-auto max-h-48 border border-slate-800 leading-relaxed"></pre>
-            <button id="btnCopyScript" class="absolute top-2 right-2 px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-semibold flex items-center gap-1.5 shadow transition">
-              <i class="fa-regular fa-copy"></i> <span>Copy Code</span>
-            </button>
-          </div>
-
-          <ol start="4" class="list-decimal list-inside space-y-2 text-xs text-slate-300">
-            <li>Click <strong>Deploy</strong> &rarr; <strong>New deployment</strong>.</li>
-            <li>Click the gear icon next to "Select type", choose <strong>Web app</strong>.</li>
-            <li>Set <strong>Who has access</strong> to <strong>Anyone</strong> (this allows the local tool to push rows).</li>
-            <li>Click <strong>Deploy</strong>, authorize if prompted, and copy the <strong>Web app URL</strong>.</li>
-            <li>Paste the URL in <button id="btnJumpToSettings" class="text-blue-400 underline font-semibold">Settings</button> or in the Push dialog!</li>
-          </ol>
         </div>
 
-        <!-- How YAMM Works -->
-        <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-5 space-y-3">
-          <h4 class="text-xs uppercase font-bold tracking-wider text-blue-400 flex items-center gap-2">
-            <i class="fa-solid fa-paper-plane"></i> How to Send Emails with Yet Another Mail Merge (YAMM)
-          </h4>
-          <p class="text-xs text-slate-300">
-            Your Google Sheet contains strictly 3 columns formatted for clean mail merge:
-          </p>
-          <div class="grid grid-cols-3 gap-3 text-xs">
-            <div class="bg-slate-900 p-2.5 rounded border border-slate-800 text-center"><span class="text-slate-400 block text-[10px] mb-1">Column A</span><code class="text-cyan-300 font-bold font-mono">{{Name}}</code></div>
-            <div class="bg-slate-900 p-2.5 rounded border border-slate-800 text-center"><span class="text-slate-400 block text-[10px] mb-1">Column B (Recipient)</span><code class="text-cyan-300 font-bold font-mono">{{Email}}</code></div>
-            <div class="bg-slate-900 p-2.5 rounded border border-slate-800 text-center"><span class="text-slate-400 block text-[10px] mb-1">Column C</span><code class="text-cyan-300 font-bold font-mono">{{Company}}</code></div>
-          </div>
-          <p class="text-xs text-slate-400">
-            In your Gmail draft, write: <code class="text-amber-300 bg-slate-900 px-1.5 py-0.5 rounded font-mono">"Hi {{Name}}, saw your work at {{Company}}..."</code> and start YAMM from Google Sheets!
-          </p>
+        <ol class="list-decimal list-inside space-y-2 text-slate-400 leading-relaxed">
+          <li>Open your Google Sheet (e.g. <code>Optum HR Leads</code>).</li>
+          <li>Click <strong>Extensions</strong> &rarr; <strong>Apps Script</strong>.</li>
+          <li>Paste the code snippet below into the editor:</li>
+        </ol>
+
+        <!-- Code Box -->
+        <div class="relative">
+          <pre id="appsScriptCode" class="bg-slate-950 p-4 rounded-xl text-[11px] font-mono text-cyan-300 overflow-x-auto max-h-40 border border-slate-800"></pre>
+          <button id="btnCopyScript" class="absolute top-2 right-2 px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded text-[11px] font-semibold flex items-center gap-1 shadow">
+            <i class="fa-regular fa-copy"></i> <span>Copy</span>
+          </button>
         </div>
 
+        <ol start="4" class="list-decimal list-inside space-y-2 text-slate-400 leading-relaxed">
+          <li>Click <strong>Deploy</strong> &rarr; <strong>New deployment</strong> &rarr; Select <strong>Web app</strong>.</li>
+          <li>Set <strong>Who has access</strong> to <strong>Anyone</strong>, then click <strong>Deploy</strong>.</li>
+          <li>Copy the <strong>Web app URL</strong> and paste it into <strong>Settings</strong>!</li>
+        </ol>
       </div>
 
-      <!-- Modal Footer -->
       <div class="px-6 py-4 border-t border-slate-800 bg-slate-950 flex justify-end">
         <button class="modal-close px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-lg text-xs transition">
           Close Guide
@@ -294,10 +296,10 @@
 
   <!-- Settings Modal -->
   <div id="settingsModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden animate-scale-in">
       <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
         <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <i class="fa-solid fa-sliders text-blue-400"></i> Settings & Integrations
+          <i class="fa-solid fa-sliders text-cyan-400"></i> Settings & Integrations
         </h3>
         <button class="modal-close text-slate-400 hover:text-white text-lg">
           <i class="fa-solid fa-xmark"></i>
@@ -307,44 +309,38 @@
       <div class="p-6 space-y-4 text-xs">
         <div>
           <label class="block font-semibold text-slate-300 mb-1">Google Apps Script Webhook URL</label>
-          <input type="text" id="cfgWebhookUrl" placeholder="https://script.google.com/macros/s/.../exec" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 focus:ring-1 focus:ring-blue-500 focus:outline-none font-mono">
-          <p class="text-[11px] text-slate-500 mt-1">From your Google Sheet Apps Script deployment. Allows 1-click push directly to your sheet.</p>
+          <input 
+            type="text" 
+            id="cfgWebhookUrl" 
+            placeholder="https://script.google.com/macros/s/.../exec" 
+            class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 focus:ring-1 focus:ring-blue-500 focus:outline-none font-mono"
+          >
+          <p class="text-[11px] text-slate-500 mt-1">From your Google Sheet deployment. Allows 1-click uploads directly to your spreadsheet.</p>
         </div>
 
         <div>
-          <label class="block font-semibold text-slate-300 mb-1">Default Corporate Email Pattern</label>
+          <label class="block font-semibold text-slate-300 mb-1 flex items-center justify-between">
+            <span>Hunter.io API Key (Optional)</span>
+            <span class="text-[10px] text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">SMTP Deliverability Check</span>
+          </label>
+          <input 
+            type="password" 
+            id="cfgHunterKey" 
+            placeholder="Enter Hunter.io API key if available" 
+            class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 focus:ring-1 focus:ring-blue-500 focus:outline-none font-mono"
+          >
+          <p class="text-[11px] text-slate-500 mt-1">If provided, verifies mailbox deliverability directly before saving.</p>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">Default Corporate Pattern</label>
           <select id="cfgDefaultPattern" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 focus:ring-1 focus:ring-blue-500 focus:outline-none">
-            <option value="first.last">first.last@domain (e.g. amit.vaish@optum.com) - Standard Enterprise</option>
+            <option value="first.last">first.last@domain (e.g. amit.vaish@optum.com) - Enterprise Standard</option>
             <option value="flast">flast@domain (e.g. avaish@optum.com)</option>
             <option value="firstlast">firstlast@domain (e.g. amitvaish@optum.com)</option>
             <option value="first_last">first_last@domain (e.g. amit_vaish@optum.com)</option>
             <option value="first">first@domain (e.g. amit@optum.com)</option>
-            <option value="last.first">last.first@domain (e.g. vaish.amit@optum.com)</option>
           </select>
-        </div>
-
-        <div>
-          <label class="block font-semibold text-slate-300 mb-1 flex items-center justify-between">
-            <span>Google Search API Key (Serper.dev)</span>
-            <span class="text-[10px] text-cyan-400 font-semibold bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">Free 2,500 Searches</span>
-          </label>
-          <input type="password" id="cfgSerperKey" placeholder="Enter Serper.dev API Key" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 focus:ring-1 focus:ring-blue-500 focus:outline-none font-mono">
-          <p class="text-[11px] text-slate-500 mt-1">Get 2,500 free Google searches with 0 credit card at <a href="https://serper.dev" target="_blank" class="text-cyan-400 underline font-semibold">serper.dev</a>. Required on Render/Cloud to bypass bot CAPTCHAs.</p>
-        </div>
-
-        <div>
-          <label class="block font-semibold text-slate-300 mb-1 flex items-center justify-between">
-            <span>Apollo.io API Key (Optional)</span>
-            <span class="text-[10px] text-amber-400 font-semibold bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">Recommended B2B</span>
-          </label>
-          <input type="password" id="cfgApolloKey" placeholder="Enter Apollo.io API Key" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 focus:ring-1 focus:ring-blue-500 focus:outline-none font-mono">
-          <p class="text-[11px] text-slate-500 mt-1">If provided, matches discovered LinkedIn candidates against Apollo's global database to reveal verified business emails.</p>
-        </div>
-
-        <div>
-          <label class="block font-semibold text-slate-300 mb-1">Hunter.io API Key (Optional)</label>
-          <input type="password" id="cfgHunterKey" placeholder="Enter Hunter.io API key if available" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 focus:ring-1 focus:ring-blue-500 focus:outline-none font-mono">
-          <p class="text-[11px] text-slate-500 mt-1">Optional. If set, queries Hunter.io Email Finder API for verified confidence score.</p>
         </div>
       </div>
 
@@ -358,53 +354,13 @@
     </div>
   </div>
 
-  <!-- Push to Google Sheet Modal -->
-  <div id="pushModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden">
-      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <i class="fa-solid fa-table-cells text-emerald-400"></i> Push Leads to Google Sheet
-        </h3>
-        <button class="modal-close text-slate-400 hover:text-white text-lg">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <div class="p-6 space-y-4 text-xs">
-        <div class="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3 text-slate-300 flex items-center gap-3">
-          <i class="fa-solid fa-circle-info text-blue-400 text-base"></i>
-          <div>
-            <p class="font-medium text-white" id="pushLeadsCountNotice">Ready to push 10 selected leads.</p>
-            <p class="text-[11px] text-slate-400">Rows will be appended to your Google Sheet with YAMM column tags.</p>
-          </div>
-        </div>
-
-        <div>
-          <label class="block font-semibold text-slate-300 mb-1">Google Apps Script Webhook URL</label>
-          <input type="text" id="pushWebhookUrlInput" placeholder="https://script.google.com/macros/s/.../exec" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 focus:ring-1 focus:ring-blue-500 focus:outline-none font-mono">
-          <p class="text-[11px] text-slate-400 mt-1">
-            Need a webhook? Check the <button id="btnOpenGuideFromPush" class="text-cyan-400 underline font-medium">1-minute setup guide</button>.
-          </p>
-        </div>
-
-        <div id="pushStatusAlert" class="hidden rounded-lg p-3 text-xs"></div>
-      </div>
-
-      <div class="px-6 py-4 border-t border-slate-800 bg-slate-950 flex items-center justify-between">
-        <button class="modal-close px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-lg text-xs transition">Cancel</button>
-        <button id="btnExecutePush" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs transition flex items-center gap-2">
-          <i class="fa-solid fa-cloud-arrow-up"></i>
-          <span>Push Now</span>
-        </button>
-      </div>
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 right-6 max-w-sm bg-slate-900 border border-slate-700/80 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none z-50">
+    <div id="toastIcon" class="text-emerald-400 text-lg">
+      <i class="fa-solid fa-circle-check"></i>
     </div>
-  </div>
-
-  <!-- Toast Notification Container -->
-  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
-    <div id="toastContent" class="bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-sm">
-      <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400"></i>
-      <span id="toastMessage">Success</span>
+    <div id="toastMessage" class="text-xs font-medium">
+      Notification
     </div>
   </div>
 

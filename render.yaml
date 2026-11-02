@@ -1,16 +1,13 @@
 services:
   - type: web
-    name: linkedin-finder-email-extractor
-    runtime: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    name: linkedin-finder-and-email-extractor
+    runtime: docker
     plan: free
+    region: oregon
+    buildCommand: ""
+    startCommand: ""
     envVars:
-      - key: GOOGLE_WEBHOOK_URL
-        sync: false
-      - key: APOLLO_API_KEY
-        sync: false
-      - key: HUNTER_API_KEY
-        sync: false
+      - key: PORT
+        value: 10000
       - key: DEFAULT_PATTERN
         value: first.last
