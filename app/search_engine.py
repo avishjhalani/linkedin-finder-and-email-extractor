@@ -187,7 +187,7 @@ def search_indian_hr_leads(
                     is_deliverable = True
                 elif bio_email:
                     final_email = bio_email
-                    deliverability = "🟢 Verified (Public Recruiter Bio)"
+                    deliverability = "Verified (Public Recruiter Bio)"
                     is_deliverable = True
                 else:
                     # Select corporate pattern
@@ -198,20 +198,20 @@ def search_indian_hr_leads(
                         hunter_check = verify_email_deliverability(final_email, hunter_api_key)
                         if hunter_check.get("verified"):
                             if hunter_check.get("deliverable"):
-                                deliverability = f"🟢 Hunter Verified ({hunter_check.get('score')}%)"
+                                deliverability = f"Hunter Verified ({hunter_check.get('score')}%)"
                                 is_deliverable = True
                             else:
-                                deliverability = f"🔴 Undeliverable ({hunter_check.get('status')})"
+                                deliverability = f"Undeliverable ({hunter_check.get('status')})"
                                 is_deliverable = False
                         else:
-                            deliverability = f"🟡 Active MX Pattern ({preferred_pattern})"
+                            deliverability = f"Active MX Pattern ({preferred_pattern})"
                             is_deliverable = None
                     else:
                         if mx_valid:
-                            deliverability = f"🟡 Active MX Pattern ({preferred_pattern})"
+                            deliverability = f"Active MX Pattern ({preferred_pattern})"
                             is_deliverable = None
                         else:
-                            deliverability = f"🔴 Inactive Domain"
+                            deliverability = "Inactive Domain"
                             is_deliverable = False
                             
                 leads.append({

@@ -77,6 +77,14 @@ app = FastAPI(
     version="2.0.0"
 )
 
+@app.middleware("http")
+async def add_no_cache_headers(request, call_next):
+    response = await call_next(request)
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
 # Request Models
 class SearchRequest(BaseModel):
     company: str
@@ -206,5 +214,12 @@ app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 def serve_index():
     index_file = static_dir / "index.html"
     if index_file.exists():
-        return FileResponse(str(index_file))
+        return FileResponse(
+            str(index_file),
+            headers={
+                "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
+                "Pragma": "no-cache",
+                "Expires": "0"
+            }
+        )
     return {"message": "LinkedIn HR Finder API is running"}

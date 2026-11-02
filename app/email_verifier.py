@@ -332,7 +332,7 @@ def query_apollo_people_match(
                 if email and "email_not_unlocked" not in email:
                     return {
                         "email": email,
-                        "deliverability": f"🟢 Apollo Verified ({status})",
+                        "deliverability": f"Apollo Verified ({status})",
                         "status": status,
                         "title": person.get("title")
                     }
