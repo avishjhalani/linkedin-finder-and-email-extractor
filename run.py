@@ -22,11 +22,15 @@ if env_file.exists():
 
 PORT = int(os.environ.get("PORT", 8000))
 
+# Configure utf-8 stdout encoding for Windows compatibility
+if sys.platform.startswith("win"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 def open_browser():
     time.sleep(1.2)
     webbrowser.open(f"http://localhost:{PORT}")
 
 if __name__ == "__main__":
-    print(f"🚀 Starting LinkedIn HR & Executive Lead Finder on http://localhost:{PORT}")
+    print(f"[*] Starting LinkedIn HR & Executive Lead Finder on http://localhost:{PORT}")
     threading.Thread(target=open_browser, daemon=True).start()
     uvicorn.run("app.main:app", host="0.0.0.0", port=PORT, reload=False)
