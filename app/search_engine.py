@@ -9,7 +9,8 @@ from app.email_verifier import (
     parse_person_name,
     generate_email_permutations,
     extract_email_from_text,
-    verify_email_deliverability
+    verify_email_deliverability,
+    query_apollo_people_match
 )
 
 # Standard roles targeted for Indian enterprise talent scouting
@@ -63,7 +64,8 @@ def search_indian_hr_leads(
     count: int = 10,
     preferred_pattern: str = "first.last",
     custom_domain: Optional[str] = None,
-    hunter_api_key: Optional[str] = None
+    hunter_api_key: Optional[str] = None,
+    apollo_api_key: Optional[str] = None
 ) -> Dict[str, Any]:
     """
     Finds verified LinkedIn profiles for Senior Managers, HR, Talent Acquisition,
@@ -73,7 +75,7 @@ def search_indian_hr_leads(
     roles = target_roles if target_roles and len(target_roles) > 0 else DEFAULT_TARGET_ROLES
     
     # 1. Resolve domain and check corporate mail server MX
-    domain = custom_domain.strip().lower() if custom_domain else resolve_company_domain(clean_company)
+    domain = custom_domain.strip().lower() if custom_domain else resolve_company_domain(clean_company, apollo_api_key)
     mx_valid, mx_hosts, mail_provider = verify_mx_records(domain)
     
     # 2. Build targeted India search queries
@@ -166,10 +168,24 @@ def search_indian_hr_leads(
                 # Email Generation & Verification
                 permutations = generate_email_permutations(first_name, last_name, domain)
                 
-                # Check 1: Public bio / post snippet email
+                # Check 1: Apollo.io People Match API if key configured
+                apollo_match = query_apollo_people_match(
+                    first_name=first_name,
+                    last_name=last_name,
+                    domain=domain,
+                    organization_name=clean_company,
+                    linkedin_url=clean_url,
+                    api_key=apollo_api_key
+                ) if apollo_api_key else None
+                
+                # Check 2: Public bio / post snippet email
                 bio_email = extract_email_from_text(snippet, domain)
                 
-                if bio_email:
+                if apollo_match:
+                    final_email = apollo_match["email"]
+                    deliverability = apollo_match["deliverability"]
+                    is_deliverable = True
+                elif bio_email:
                     final_email = bio_email
                     deliverability = "🟢 Verified (Public Recruiter Bio)"
                     is_deliverable = True

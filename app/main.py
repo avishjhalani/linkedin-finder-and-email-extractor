@@ -12,7 +12,24 @@ from app.search_engine import search_indian_hr_leads
 from app.sheets_client import push_to_google_sheet, generate_yamm_csv, GOOGLE_APPS_SCRIPT_TEMPLATE
 
 # Configuration management
-CONFIG_FILE = Path(__file__).parent.parent / "config.json"
+ROOT_DIR = Path(__file__).parent.parent
+CONFIG_FILE = ROOT_DIR / "config.json"
+ENV_FILE = ROOT_DIR / ".env"
+
+def load_env_file():
+    """Loads .env into os.environ if present."""
+    if ENV_FILE.exists():
+        try:
+            with open(ENV_FILE, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        k, v = line.split("=", 1)
+                        os.environ.setdefault(k.strip(), v.strip())
+        except Exception:
+            pass
+
+load_env_file()
 
 def load_file_config() -> Dict[str, Any]:
     if CONFIG_FILE.exists():
@@ -23,6 +40,7 @@ def load_file_config() -> Dict[str, Any]:
             pass
     return {
         "webhook_url": "",
+        "apollo_api_key": "",
         "hunter_api_key": "",
         "default_pattern": "first.last"
     }
@@ -35,6 +53,7 @@ def get_effective_config() -> Dict[str, Any]:
     disk = load_file_config()
     return {
         "webhook_url": os.getenv("GOOGLE_WEBHOOK_URL") or disk.get("webhook_url", ""),
+        "apollo_api_key": os.getenv("APOLLO_API_KEY") or disk.get("apollo_api_key", ""),
         "hunter_api_key": os.getenv("HUNTER_API_KEY") or disk.get("hunter_api_key", ""),
         "default_pattern": os.getenv("DEFAULT_PATTERN") or disk.get("default_pattern", "first.last")
     }
@@ -75,6 +94,7 @@ class CsvExportRequest(BaseModel):
 
 class ConfigUpdateRequest(BaseModel):
     webhook_url: Optional[str] = ""
+    apollo_api_key: Optional[str] = ""
     hunter_api_key: Optional[str] = ""
     default_pattern: Optional[str] = "first.last"
 
@@ -85,6 +105,7 @@ def api_search(req: SearchRequest):
         raise HTTPException(status_code=400, detail="Company name is required.")
         
     cfg = get_effective_config()
+    apollo_key = cfg.get("apollo_api_key", "").strip() or None
     hunter_key = cfg.get("hunter_api_key", "").strip() or None
     
     try:
@@ -94,7 +115,8 @@ def api_search(req: SearchRequest):
             count=req.count,
             preferred_pattern=req.preferred_pattern or cfg.get("default_pattern", "first.last"),
             custom_domain=req.custom_domain or None,
-            hunter_api_key=hunter_key
+            hunter_api_key=hunter_key,
+            apollo_api_key=apollo_key
         )
         return results
     except Exception as e:
@@ -136,10 +158,13 @@ def api_get_config():
     return {
         "webhook_configured": bool(cfg.get("webhook_url")),
         "webhook_masked": mask_secret(cfg.get("webhook_url", ""), is_url=True),
+        "apollo_configured": bool(cfg.get("apollo_api_key")),
+        "apollo_masked": mask_secret(cfg.get("apollo_api_key", "")),
         "hunter_configured": bool(cfg.get("hunter_api_key")),
         "hunter_masked": mask_secret(cfg.get("hunter_api_key", "")),
         "default_pattern": cfg.get("default_pattern", "first.last"),
-        "is_env_webhook": bool(os.getenv("GOOGLE_WEBHOOK_URL"))
+        "is_env_webhook": bool(os.getenv("GOOGLE_WEBHOOK_URL")),
+        "is_env_apollo": bool(os.getenv("APOLLO_API_KEY"))
     }
 
 @app.post("/api/config")
@@ -147,6 +172,8 @@ def api_update_config(req: ConfigUpdateRequest):
     disk = load_file_config()
     if req.webhook_url and "••••" not in req.webhook_url:
         disk["webhook_url"] = req.webhook_url.strip()
+    if req.apollo_api_key and "••••" not in req.apollo_api_key:
+        disk["apollo_api_key"] = req.apollo_api_key.strip()
     if req.hunter_api_key and "••••" not in req.hunter_api_key:
         disk["hunter_api_key"] = req.hunter_api_key.strip()
     if req.default_pattern:

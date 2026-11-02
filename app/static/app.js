@@ -39,6 +39,7 @@ const btnSaveSettings = document.getElementById("btnSaveSettings");
 const btnCopyScript = document.getElementById("btnCopyScript");
 const appsScriptCode = document.getElementById("appsScriptCode");
 const cfgWebhookUrl = document.getElementById("cfgWebhookUrl");
+const cfgApolloKey = document.getElementById("cfgApolloKey");
 const cfgHunterKey = document.getElementById("cfgHunterKey");
 const cfgDefaultPattern = document.getElementById("cfgDefaultPattern");
 
@@ -69,6 +70,7 @@ async function initApp() {
     if (res.ok) {
       appConfig = await res.json();
       cfgWebhookUrl.value = appConfig.webhook_masked || "";
+      if (cfgApolloKey) cfgApolloKey.value = appConfig.apollo_masked || "";
       cfgHunterKey.value = appConfig.hunter_masked || "";
       cfgDefaultPattern.value = appConfig.default_pattern || "first.last";
       patternSelect.value = appConfig.default_pattern || "first.last";
@@ -182,7 +184,9 @@ function renderLeadsTable(leads) {
     
     // Determine badge class
     let badgeClass = "badge-mx";
-    if (lead.deliverability.includes("Verified")) {
+    if (lead.deliverability.includes("Apollo")) {
+      badgeClass = "badge-apollo";
+    } else if (lead.deliverability.includes("Verified")) {
       badgeClass = "badge-verified";
     } else if (lead.deliverability.includes("Inactive") || lead.deliverability.includes("Undeliverable")) {
       badgeClass = "badge-inactive";
@@ -400,6 +404,11 @@ btnSaveSettings.addEventListener("click", async () => {
   };
   const webVal = cfgWebhookUrl.value.trim();
   if (webVal && !webVal.includes("••••")) payload.webhook_url = webVal;
+
+  if (cfgApolloKey) {
+    const apolloVal = cfgApolloKey.value.trim();
+    if (apolloVal && !apolloVal.includes("••••")) payload.apollo_api_key = apolloVal;
+  }
 
   const hunterVal = cfgHunterKey.value.trim();
   if (hunterVal && !hunterVal.includes("••••")) payload.hunter_api_key = hunterVal;

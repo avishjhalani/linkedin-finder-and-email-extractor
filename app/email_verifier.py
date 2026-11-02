@@ -91,12 +91,26 @@ KNOWN_DOMAINS: Dict[str, str] = {
     "bharti airtel": "airtel.in"
 }
 
-def resolve_company_domain(company_name: str) -> str:
+def resolve_company_domain(company_name: str, apollo_api_key: Optional[str] = None) -> str:
     """Resolves primary corporate domain for a company name."""
     clean = company_name.strip().lower()
     if clean in KNOWN_DOMAINS:
         return KNOWN_DOMAINS[clean]
     
+    # Check Apollo Organization Enrichment if API key provided
+    if apollo_api_key:
+        try:
+            url = f"https://api.apollo.io/v1/organizations/enrich?domain={urllib.parse.quote(clean)}"
+            headers = {"Content-Type": "application/json", "X-Api-Key": apollo_api_key.strip()}
+            with httpx.Client(timeout=4.0) as client:
+                r = client.get(url, headers=headers)
+                if r.status_code == 200:
+                    dom = r.json().get("organization", {}).get("primary_domain")
+                    if dom:
+                        return dom
+        except Exception:
+            pass
+
     # Check if user already typed a domain
     if "." in clean and not any(w in clean for w in ["inc", "ltd", "corp", "llc", "pvt"]):
         return clean.replace("https://", "").replace("http://", "").split("/")[0]
@@ -273,3 +287,57 @@ def verify_email_deliverability(email: str, hunter_api_key: Optional[str] = None
         "score": 0,
         "deliverable": None
     }
+
+def query_apollo_people_match(
+    first_name: str,
+    last_name: str,
+    domain: Optional[str] = None,
+    organization_name: Optional[str] = None,
+    linkedin_url: Optional[str] = None,
+    api_key: Optional[str] = None
+) -> Optional[Dict[str, Any]]:
+    """
+    Enriches candidate and extracts verified direct email using Apollo.io People Match API.
+    Docs: https://apolloio.github.io/apollo-api-docs/#people-match
+    """
+    if not api_key:
+        return None
+        
+    try:
+        url = "https://api.apollo.io/v1/people/match"
+        headers = {
+            "Content-Type": "application/json",
+            "Cache-Control": "no-cache",
+            "X-Api-Key": api_key.strip()
+        }
+        payload: Dict[str, Any] = {}
+        if first_name:
+            payload["first_name"] = first_name
+        if last_name:
+            payload["last_name"] = last_name
+        if domain:
+            payload["domain"] = domain
+        if organization_name:
+            payload["organization_name"] = organization_name
+        if linkedin_url:
+            payload["linkedin_url"] = linkedin_url
+
+        with httpx.Client(timeout=6.0) as client:
+            resp = client.post(url, json=payload, headers=headers)
+            if resp.status_code == 200:
+                person = resp.json().get("person") or {}
+                email = person.get("email")
+                status = person.get("email_status") or "verified"
+                # Exclude masked or locked emails
+                if email and "email_not_unlocked" not in email:
+                    return {
+                        "email": email,
+                        "deliverability": f"🟢 Apollo Verified ({status})",
+                        "status": status,
+                        "title": person.get("title")
+                    }
+    except Exception:
+        pass
+        
+    return None
+
